@@ -5,7 +5,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import SearchTab from './long-term-report/SearchTab';
 import TrendTab from './long-term-report/TrendTab';
-import type { LongTermDataRecord, TrendResponse } from './long-term-report/types';
+import type { LongTermDataRecord } from './long-term-report/types';
+import type { TrendResponse } from './live-report/types';
 
 interface LongTermReportProps {
   onBack: () => void;
