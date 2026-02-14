@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ArrowLeft, Save, AlertCircle, CheckCircle2, Key, X, Fingerprint } from 'lucide-react';
 import RestartButton from './RestartButton';
-import { isBiometricAvailable, getBiometricEnabled, setBiometricEnabled, authenticateWithBiometrics, registerBiometrics } from '../utils/bioAuth';
+import { isBiometricAvailable, getBiometricEnabled, setBiometricEnabled, registerBiometrics } from '../utils/bioAuth';
 
 interface SettingsProps {
   onBack: () => void;
