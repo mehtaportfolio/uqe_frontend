@@ -63,8 +63,9 @@ export const registerBiometrics = async (): Promise<boolean> => {
     });
 
     if (credential) {
-      // In a real app, you'd send credential.id to server
-      localStorage.setItem('bio_credential_id', (credential as any).id);
+      const rawId = (credential as PublicKeyCredential).rawId;
+      const base64Id = btoa(String.fromCharCode(...new Uint8Array(rawId)));
+      localStorage.setItem('bio_credential_id', base64Id);
       return true;
     }
     return false;
@@ -86,25 +87,20 @@ export const authenticateWithBiometrics = async (): Promise<boolean> => {
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
 
-    const options: any = {
-      publicKey: {
-        challenge,
-        timeout: 60000,
-        userVerification: 'required',
-      }
+    const options: PublicKeyCredentialRequestOptions = {
+      challenge,
+      timeout: 60000,
+      userVerification: 'required',
     };
 
     if (credentialId) {
-      // If we have a stored ID, use it to target the specific credential
-      // This is the "correct" way, but some browsers allow empty allowCredentials
-      // for platform authenticators.
-      // options.publicKey.allowCredentials = [{
-      //   id: Uint8Array.from(atob(credentialId), c => c.charCodeAt(0)),
-      //   type: 'public-key'
-      // }];
+      options.allowCredentials = [{
+        id: Uint8Array.from(atob(credentialId), c => c.charCodeAt(0)),
+        type: 'public-key'
+      }];
     }
 
-    const credential = await navigator.credentials.get(options);
+    const credential = await navigator.credentials.get({ publicKey: options });
 
     return !!credential;
   } catch (err) {
