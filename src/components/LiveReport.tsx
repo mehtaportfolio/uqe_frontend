@@ -233,6 +233,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       const response = await fetch(url.toString());
       const result = await response.json();
       setAvailableFilters(result);
+
+      // If dashboard and no date selected, default to yesterday (dates[1])
+      if (initialTab === 'dashboard' && !selectedDate && result.dates && result.dates.length > 0) {
+        const defaultDate = result.dates[1] || result.dates[0];
+        setSelectedDate(defaultDate);
+      }
     } catch (error) {
       console.error("Error fetching filters:", error);
     }
@@ -319,8 +325,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
   };
 
   const resetFilters = () => {
-    setSelectedDate('');
-    setSelectedShift('');
+    if (initialTab === 'dashboard' && availableFilters.dates.length > 0) {
+      setSelectedDate(availableFilters.dates[1] || availableFilters.dates[0]);
+    } else {
+      setSelectedDate('');
+    }
+    setSelectedShift('all');
     setSelectedUnit('');
     setSelectedMachine('');
   };

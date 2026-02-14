@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ArrowLeft, Save, AlertCircle, CheckCircle2, Key, X, Fingerprint } from 'lucide-react';
 import RestartButton from './RestartButton';
-import { isBiometricAvailable, getBiometricEnabled, setBiometricEnabled } from '../utils/bioAuth';
+import { isBiometricAvailable, getBiometricEnabled, setBiometricEnabled, authenticateWithBiometrics, registerBiometrics } from '../utils/bioAuth';
 
 interface SettingsProps {
   onBack: () => void;
@@ -30,10 +30,26 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
     checkBio();
   }, []);
 
-  const handleToggleBio = () => {
+  const handleToggleBio = async () => {
     const newState = !bioEnabled;
+    
+    if (newState) {
+      // Ask for biometric verification before enabling
+      // We use registerBiometrics to ensure a credential exists and trigger the prompt
+      const success = await registerBiometrics();
+      if (!success) {
+        setError('Biometric registration failed');
+        return;
+      }
+    }
+    
     setBioEnabled(newState);
     setBiometricEnabled(newState, currentPassword);
+    
+    if (newState) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,36 +127,36 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl shadow-xl p-8 space-y-6"
+          className="bg-white rounded-3xl shadow-xl p-5 sm:p-8 space-y-4 sm:space-y-6"
         >
           <div className="space-y-4">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="w-full bg-gray-50 hover:bg-gray-100 text-gray-800 p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all group"
+              className="w-full bg-gray-50 hover:bg-gray-100 text-gray-800 p-4 sm:p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all group"
             >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                  <Key size={24} />
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                  <Key size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Security</p>
-                  <p className="text-lg font-black uppercase">Change Password</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">Security</p>
+                  <p className="text-base sm:text-lg font-black uppercase">Change Password</p>
                 </div>
               </div>
-              <ArrowLeft className="rotate-180 text-gray-300" size={20} />
+              <ArrowLeft className="rotate-180 text-gray-300" size={18} />
             </button>
 
             {bioSupported && (
               <div
-                className="w-full bg-gray-50 text-gray-800 p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all"
+                className="w-full bg-gray-50 text-gray-800 p-4 sm:p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                    <Fingerprint size={24} />
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                    <Fingerprint size={20} className="sm:w-6 sm:h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authentication</p>
-                    <p className="text-lg font-black uppercase">Biometric Login</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authentication</p>
+                    <p className="text-base sm:text-lg font-black uppercase">Biometric Login</p>
                   </div>
                 </div>
                 <button 
@@ -186,10 +202,10 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                 </button>
               </div>
               
-              <div className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="p-6 sm:p-8">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">New Password</label>
+                    <label className="block text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 sm:mb-2 ml-1">New Password</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                         <Lock size={18} />
@@ -199,14 +215,14 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="New Password"
-                        className="block w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
+                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Confirm New Password</label>
+                    <label className="block text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 sm:mb-2 ml-1">Confirm New Password</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                         <Lock size={18} />
@@ -216,7 +232,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm New Password"
-                        className="block w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
+                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
                         required
                       />
                     </div>
@@ -226,10 +242,10 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center space-x-2 text-red-600 bg-red-50 p-4 rounded-xl border border-red-100"
+                      className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 sm:p-4 rounded-xl border border-red-100"
                     >
                       <AlertCircle size={18} />
-                      <p className="text-xs font-bold uppercase tracking-wide">{error}</p>
+                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide">{error}</p>
                     </motion.div>
                   )}
 
@@ -237,17 +253,17 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center space-x-2 text-green-600 bg-green-50 p-4 rounded-xl border border-green-100"
+                      className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 sm:p-4 rounded-xl border border-green-100"
                     >
                       <CheckCircle2 size={18} />
-                      <p className="text-xs font-bold uppercase tracking-wide">Password changed successfully!</p>
+                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide">Password changed successfully!</p>
                     </motion.div>
                   )}
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
+                    className="w-full bg-red-600 text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
                   >
                     {loading ? (
                       <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>

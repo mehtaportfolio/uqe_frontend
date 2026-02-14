@@ -30,6 +30,7 @@ interface UnitData {
   unit?: string;
   unitCuts?: UnitCuts;
   shiftNumber?: string;
+  latestShift?: string;
 }
 
 const App: React.FC = () => {
@@ -62,7 +63,7 @@ const App: React.FC = () => {
   const fetchData = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
-      const response = await fetch(`${API_BASE}/quantum/live?shift=all`);
+      const response = await fetch(`${API_BASE}/quantum/live`);
       const result = await response.json();
       setUnitsData(result);
       setLoading(false);
@@ -171,7 +172,7 @@ const App: React.FC = () => {
             <div className="flex items-center space-x-2">
               <span className={`w-2 h-2 ${loading ? 'bg-amber-400' : 'bg-green-400'} rounded-full animate-pulse`}></span>
               <span className="text-[10px] font-bold text-gray-400 uppercase">
-                {loading ? 'Loading Data...' : `Live Data ${currentUnitData.shiftNumber && currentUnitData.shiftNumber !== 'All' ? `(${currentUnitData.shiftNumber})` : ''}`}
+                {loading ? 'Loading Data...' : `Live Data ${currentUnitData.latestShift && currentUnitData.latestShift !== 'All' ? `(${currentUnitData.latestShift})` : ''}`}
               </span>
             </div>
           </div>
@@ -181,7 +182,7 @@ const App: React.FC = () => {
         {!loading && (
           <main className="flex-1 px-6 pt-6 pb-24">
             <div className="grid grid-cols-2 gap-4">
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {stats.map((stat, index) => (
                   <motion.div
                     key={`${currentUnitData.unit}-${stat.label}`}

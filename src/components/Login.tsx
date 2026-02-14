@@ -117,10 +117,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
+            className="w-full bg-red-600 text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
           >
             {loading ? (
-              <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-5 h-5 sm:w-6 sm:h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
               'Unlock Dashboard'
             )}
@@ -130,9 +130,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <button
               type="button"
               onClick={handleBioAuth}
-              className="w-full bg-blue-50 text-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest border-2 border-blue-100 active:scale-95 transition-all flex items-center justify-center space-x-2"
+              className="w-full bg-blue-50 text-blue-600 py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest border-2 border-blue-100 active:scale-95 transition-all flex items-center justify-center space-x-2 text-sm sm:text-base"
             >
-              <Fingerprint size={20} />
+              <Fingerprint size={18} className="sm:w-5 sm:h-5" />
               <span>Use Biometrics</span>
             </button>
           )}
