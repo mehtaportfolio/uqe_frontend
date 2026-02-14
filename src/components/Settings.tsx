@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, ArrowLeft, Save, AlertCircle, CheckCircle2, Server, Key, X } from 'lucide-react';
+import { Lock, ArrowLeft, Save, AlertCircle, CheckCircle2, Key, X, Fingerprint } from 'lucide-react';
+import RestartButton from './RestartButton';
+import { isBiometricAvailable, getBiometricEnabled, setBiometricEnabled } from '../utils/bioAuth';
 
 interface SettingsProps {
   onBack: () => void;
@@ -16,6 +18,23 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioEnabled, setBioEnabled] = useState(false);
+
+  useEffect(() => {
+    const checkBio = async () => {
+      const supported = await isBiometricAvailable();
+      setBioSupported(supported);
+      setBioEnabled(getBiometricEnabled());
+    };
+    checkBio();
+  }, []);
+
+  const handleToggleBio = () => {
+    const newState = !bioEnabled;
+    setBioEnabled(newState);
+    setBiometricEnabled(newState, currentPassword);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +67,10 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
       if (!response.ok) {
         setError(data.error || 'Failed to change password');
       } else {
+        // Update stored biometric password if enabled
+        if (bioEnabled) {
+          setBiometricEnabled(true, newPassword);
+        }
         setSuccess(true);
         setNewPassword('');
         setConfirmPassword('');
@@ -107,21 +130,31 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
               <ArrowLeft className="rotate-180 text-gray-300" size={20} />
             </button>
 
-            <button
-              onClick={() => alert('Server restart triggered (Dummy)')}
-              className="w-full bg-gray-50 hover:bg-gray-100 text-gray-800 p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all group"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
-                  <Server size={24} />
+            {bioSupported && (
+              <div
+                className="w-full bg-gray-50 text-gray-800 p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                    <Fingerprint size={24} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authentication</p>
+                    <p className="text-lg font-black uppercase">Biometric Login</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">System</p>
-                  <p className="text-lg font-black uppercase">Server Restart</p>
-                </div>
+                <button 
+                  onClick={handleToggleBio}
+                  className={`w-14 h-8 rounded-full relative transition-colors duration-300 ${bioEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
+                >
+                  <motion.div 
+                    animate={{ x: bioEnabled ? 24 : 4 }}
+                    className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-sm"
+                  />
+                </button>
               </div>
-              <ArrowLeft className="rotate-180 text-gray-300" size={20} />
-            </button>
+            )}
+            <RestartButton variant="full" />
           </div>
         </motion.div>
       </main>

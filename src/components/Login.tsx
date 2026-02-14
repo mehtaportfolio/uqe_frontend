@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, ShieldCheck, AlertCircle, Fingerprint } from 'lucide-react';
+import { getBiometricEnabled, getStoredPassword, authenticateWithBiometrics } from '../utils/bioAuth';
 
 interface LoginProps {
   onLogin: (password: string) => void;
@@ -12,6 +13,33 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isBioEnabled, setIsBioEnabled] = useState(false);
+
+  const handleBioAuth = useCallback(async () => {
+    const success = await authenticateWithBiometrics();
+    if (success) {
+      const storedPassword = getStoredPassword();
+      if (storedPassword) {
+        // Automatically login with stored password
+        onLogin(storedPassword);
+      } else {
+        setError('Biometric data found but password missing. Please enter password.');
+      }
+    }
+  }, [onLogin]);
+
+  useEffect(() => {
+    const enabled = getBiometricEnabled();
+    setIsBioEnabled(enabled);
+    
+    if (enabled) {
+      // Auto-trigger bio auth after a short delay to allow UI to render
+      const timer = setTimeout(() => {
+        handleBioAuth();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [handleBioAuth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +125,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               'Unlock Dashboard'
             )}
           </button>
+
+          {isBioEnabled && (
+            <button
+              type="button"
+              onClick={handleBioAuth}
+              className="w-full bg-blue-50 text-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest border-2 border-blue-100 active:scale-95 transition-all flex items-center justify-center space-x-2"
+            >
+              <Fingerprint size={20} />
+              <span>Use Biometrics</span>
+            </button>
+          )}
         </form>
       </motion.div>
       

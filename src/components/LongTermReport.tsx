@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import SearchTab from './long-term-report/SearchTab';
 import TrendTab from './long-term-report/TrendTab';
+import RestartButton from './RestartButton';
 import type { LongTermDataRecord } from './long-term-report/types';
 import type { TrendResponse } from './live-report/types';
 
@@ -248,6 +249,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           >
             <Home className="text-white" size={20} />
           </motion.button>
+          <RestartButton />
           <h1 className="text-xl font-black text-white uppercase tracking">Long Term</h1>
           <div className="flex space-x-3">
             <motion.button 

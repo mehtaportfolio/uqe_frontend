@@ -31,6 +31,7 @@ import CutsView from './live-report/CutsView';
 import AlarmsView from './live-report/AlarmsView';
 import QualityView from './live-report/QualityView';
 import TrendView from './live-report/TrendView';
+import RestartButton from './RestartButton';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -180,7 +181,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
     if (initialTab === 'dashboard') {
       setActiveTab('dashboard');
     } else if (activeTab === 'dashboard') {
-      setActiveTab('quality');
+      setActiveTab('cuts');
     }
   }, [initialTab, activeTab]);
 
@@ -195,7 +196,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
   }>({ dates: [], shifts: [], units: [], machines: [], articles: [], articleNames: [], lotIds: [] });
 
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedShift, setSelectedShift] = useState<string>('');
+  const [selectedShift, setSelectedShift] = useState<string>('all');
   const [selectedUnit, setSelectedUnit] = useState<string>('');
   const [selectedMachine, setSelectedMachine] = useState<string>('');
   const [expandedArticles, setExpandedArticles] = useState<Record<string, boolean>>({});
@@ -243,8 +244,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       const params = new URLSearchParams();
       if (selectedDate) params.append('date', selectedDate);
       if (selectedShift) params.append('shift', selectedShift);
-      if (selectedUnit) params.append('unit', selectedUnit);
-      if (selectedMachine) params.append('machine', selectedMachine);
+      
+      // Only apply unit and machine filters if NOT on the dashboard
+      if (activeTab !== 'dashboard') {
+        if (selectedUnit) params.append('unit', selectedUnit);
+        if (selectedMachine) params.append('machine', selectedMachine);
+      }
       
       const response = await fetch(`${API_BASE}/quantum/live?${params.toString()}`);
       const result = await response.json();
@@ -667,9 +672,9 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
   };
 
   const onlineSubTabs = [
-    { id: 'quality', label: 'Quality', icon: Layers },
     { id: 'cuts', label: 'Cuts', icon: Scissors },
     { id: 'alarms', label: 'Alarms', icon: Bell },
+    { id: 'quality', label: 'Quality', icon: Layers },
     { id: 'trend', label: 'Trend', icon: TrendingUp },
   ] as const;
 
@@ -680,6 +685,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           <button onClick={onBack} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
             <Home className="text-white" size={20} />
           </button>
+          <RestartButton />
           <h2 className="text-white font-black uppercase tracking-tight text-center flex-1">
             {mainTab === 'dashboard' ? 'Live Dashboard' : 'Online Data'}
           </h2>
@@ -700,14 +706,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
               animate={{ opacity: 1, height: 'auto', y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
               ref={tabsRef}
-              className="flex space-x-2 overflow-x-auto no-scrollbar pb-3 pt-2 mt-1 border-t border-white/10 px-1"
+              className="grid grid-cols-2 gap-2 pb-3 pt-2 mt-1 border-t border-white/10 px-1"
             >
               {onlineSubTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   data-active={activeTab === tab.id}
-                  className={`flex-none min-w-[90px] flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all shadow-sm ${
+                  className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all shadow-sm ${
                     activeTab === tab.id 
                       ? 'bg-red-700 text-white font-black' 
                       : 'bg-white text-red-600 font-bold hover:bg-gray-50'
@@ -730,7 +736,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
               {activeTab !== 'dashboard' && activeTab !== 'trend' && (
                 <button onClick={() => setViewMode(prev => prev === 'article' ? 'machine' : 'article')} className="flex items-center space-x-1 text-red-600 group">
                   <Repeat size={12} className={`transition-transform duration-300 ${viewMode === 'machine' ? 'rotate-180' : ''}`} />
-                  <span className="text-[10px] font-black uppercase tracking-wider">{viewMode === 'article' ? 'Article View' : 'Machine View'}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider">{viewMode === 'article' ? 'Machine View' : 'Article View'}</span>
                 </button>
               )}
               {(selectedDate || selectedShift || selectedUnit || selectedMachine) && (

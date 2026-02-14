@@ -8,10 +8,12 @@ import {
   LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import LiveReport from './components/LiveReport';
 import LongTermReport from './components/LongTermReport';
 import Login from './components/Login';
 import SettingsView from './components/Settings';
+import RestartButton from './components/RestartButton';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -38,10 +40,29 @@ const App: React.FC = () => {
   const [currentUnitIndex, setCurrentUnitIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // PWA Auto Update logic
+  useRegisterSW({
+    onRegistered(r) {
+      if (r) {
+        // Check for updates every hour
+        setInterval(() => {
+          r.update();
+        }, 60 * 60 * 1000);
+      }
+    },
+    onNeedRefresh() {
+      // Force reload when a new version is available
+      window.location.reload();
+    },
+    onOfflineReady() {
+      console.log('App ready to work offline');
+    },
+  });
+
   const fetchData = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
-      const response = await fetch(`${API_BASE}/quantum/live`);
+      const response = await fetch(`${API_BASE}/quantum/live?shift=all`);
       const result = await response.json();
       setUnitsData(result);
       setLoading(false);
@@ -116,6 +137,7 @@ const App: React.FC = () => {
               <Home className="text-white" size={20} />
             </div>
             <div className="flex space-x-3">
+              <RestartButton />
               <button 
                 onClick={() => {
                   setIsAuthenticated(false);
