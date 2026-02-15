@@ -66,12 +66,19 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
   }
 
   const dates = response.dates || Array.from(new Set(response.data.map(d => d.date))).sort();
+  const allKeys = response.allKeys || dates;
+  const isShiftReport = response.reportType === 'shift';
   const latestDate = dates[dates.length - 1];
 
   const filteredLabels = response.labels.filter(label => {
     if (!hideEmptyLatest) return true;
-    const latestVal = response.data.find(d => d.date === latestDate)?.[label];
-    return latestVal !== undefined && latestVal !== null && latestVal !== "0.00" && latestVal !== 0;
+    // Check all entries for the latest date (all shifts if shift report)
+    const latestEntries = response.data.filter(d => d.date.startsWith(latestDate));
+    const hasData = latestEntries.some(d => {
+      const val = d[label];
+      return val !== undefined && val !== null && val !== "0.00" && val !== 0;
+    });
+    return hasData;
   });
 
   const renderRows = (label: string, idx: number, isSubRow = false, parentLabel?: string) => {
@@ -79,15 +86,15 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
     
     // Find the oldest available data point for this row
     let oldestVal: any = undefined;
-    for (const date of dates) {
-      const val = dataSet.find(d => d.date === date)?.[label];
+    for (const key of allKeys) {
+      const val = dataSet.find(d => d.date === key)?.[label];
       if (val !== undefined && val !== null) {
         oldestVal = val;
         break;
       }
     }
     
-    const latestVal = latestDate ? dataSet.find(d => d.date === latestDate)?.[label] : undefined;
+    const latestVal = allKeys.length > 0 ? dataSet.find(d => d.date === allKeys[allKeys.length - 1])?.[label] : undefined;
     
     let diffPercent = '-';
     if (oldestVal !== undefined && latestVal !== undefined) {
@@ -114,11 +121,11 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
               <span>{label}</span>
             </div>
           </td>
-          {dates.map(date => {
-            const dayData = dataSet.find(d => d.date === date);
+          {allKeys.map(key => {
+            const dayData = dataSet.find(d => d.date === key);
             const value = dayData ? dayData[label] : undefined;
             return (
-              <td key={date} className={`px-4 py-3 text-xs font-medium border-b border-gray-100 text-center ${isSubRow ? 'text-gray-400' : 'text-gray-600'}`}>
+              <td key={key} className={`px-4 py-3 text-xs font-medium border-b border-gray-100 text-center ${isSubRow ? 'text-gray-400' : 'text-gray-600'}`}>
                 {value !== undefined ? value : '-'}
               </td>
             );
@@ -148,18 +155,27 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-r border-red-100 text-left sticky left-0 z-10">
+              <th rowSpan={isShiftReport ? 2 : 1} className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-r border-red-100 text-left sticky left-0 z-10">
                 Trend
               </th>
               {dates.map(date => (
-                <th key={date} className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
+                <th key={date} colSpan={isShiftReport ? allKeys.filter(k => k.startsWith(date)).length : 1} className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
                   {formatDate(date)}
                 </th>
               ))}
-              <th className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
+              <th rowSpan={isShiftReport ? 2 : 1} className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
                 % Diff
               </th>
             </tr>
+            {isShiftReport && (
+              <tr>
+                {allKeys.map(key => (
+                  <th key={key} className="bg-red-50 text-uster-red px-2 py-2 text-[10px] font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
+                    S{key.split('_')[1]}
+                  </th>
+                ))}
+              </tr>
+            )}
           </thead>
           <tbody>
             {filteredLabels.map((label, idx) => renderRows(label, idx))}

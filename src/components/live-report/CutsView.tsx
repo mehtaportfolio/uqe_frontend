@@ -45,7 +45,7 @@ const CutsView: React.FC<CutsViewProps> = ({
           <div key={unitData.unit} className="mb-8 last:mb-0">
             <div className="bg-red-50 px-6 py-3 border-y border-red-100">
               <h4 className="font-black text-uster-red uppercase tracking-widest text-xs">
-                {unitData.unit} - {unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}
+                {unitData.unit} - {unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}{unitData.shiftNumber && unitData.shiftNumber !== 'All' ? ` - Shift ${unitData.shiftNumber}` : ''}
               </h4>
             </div>
             <div className="overflow-x-auto">

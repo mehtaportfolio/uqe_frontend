@@ -206,8 +206,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
   // Trend specific state
   const [selectedTrendGroup, setSelectedTrendGroup] = useState<string>('quality');
   const [selectedFirstColumn, setSelectedFirstColumn] = useState<string>('unit');
+  const [selectedFilterColumn, setSelectedFilterColumn] = useState<string>('unit');
+  const [selectedReportType, setSelectedReportType] = useState<'daily' | 'shift'>('daily');
   const [selectedParameter, setSelectedParameter] = useState<string>(DEFAULT_GROUP_PARAMETERS['quality']);
   const [selectedTrendValues, setSelectedTrendValues] = useState<string[]>([]);
+  const [selectedTrendDates, setSelectedTrendDates] = useState<string[]>([]);
+  const [selectedFilterValues, setSelectedFilterValues] = useState<string[]>([]);
   const [trendResponse, setTrendResponse] = useState<TrendResponse | null>(null);
   const [trendLoading, setTrendLoading] = useState(false);
   const [hideEmptyLatest, setHideEmptyLatest] = useState(true);
@@ -278,8 +282,16 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       params.append('group', selectedTrendGroup);
       params.append('firstColumn', selectedFirstColumn);
       params.append('parameter', selectedParameter);
+      params.append('reportType', selectedReportType);
       if (selectedUnit) params.append('unit', selectedUnit);
       if (selectedTrendValues.length > 0) params.append('filterValues', selectedTrendValues.join(','));
+      if (selectedTrendDates.length > 0) params.append('dates', selectedTrendDates.join(','));
+      
+      // New filters
+      if (selectedFilterValues.length > 0) {
+        params.append('filterType', selectedFilterColumn);
+        params.append('additionalFilterValues', selectedFilterValues.join(','));
+      }
       
       const response = await fetch(`${API_BASE}/quantum/trend?${params.toString()}`);
       const result = await response.json();
@@ -291,8 +303,9 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
     }
   };
 
-  const getTrendValueOptions = () => {
-    switch (selectedFirstColumn) {
+  const getTrendValueOptions = (columnId?: string) => {
+    const col = columnId || selectedFirstColumn;
+    switch (col) {
       case 'unit': return availableFilters.units;
       case 'machinename': return availableFilters.machines;
       case 'articlenumber': return availableFilters.articles;
@@ -306,6 +319,8 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
     fetchFilters(selectedUnit);
     if (activeTab === 'trend') {
       setSelectedTrendValues([]);
+      setSelectedTrendDates([]);
+      setSelectedFilterValues([]);
       setTrendResponse(null);
     }
   }, [selectedUnit, activeTab]);
@@ -358,7 +373,20 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
   const downloadPDF = async () => {
     setRefreshing(true);
     try {
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // Determine orientation based on columns
+      let orientation: 'p' | 'l' = 'p';
+      let colCount = 0;
+      
+      if (activeTab === 'quality') colCount = 8;
+      else if (activeTab === 'cuts') colCount = 10;
+      else if (activeTab === 'alarms') colCount = 13;
+      else if (activeTab === 'trend' && trendResponse) {
+        colCount = (trendResponse.allKeys || trendResponse.dates || []).length + 2;
+      }
+
+      if (colCount > 8) orientation = 'l';
+
+      const pdf = new jsPDF(orientation, 'mm', 'a4');
       const tabName = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
       const fileName = `Live_Quality_${tabName}_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`;
 
@@ -503,7 +531,8 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(200, 16, 46);
-          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
+          const shiftInfo = unitData.shiftNumber && unitData.shiftNumber !== 'All' ? ` - Shift ${unitData.shiftNumber}` : '';
+          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
           const tableData: any[] = [];
@@ -540,7 +569,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'Thin50', 'Thick50', 'Nep200', 'CV%', 'H', 'IPI', 'HS IPI']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 30, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -559,7 +588,8 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(200, 16, 46);
-          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
+          const shiftInfo = unitData.shiftNumber && unitData.shiftNumber !== 'All' ? ` - Shift ${unitData.shiftNumber}` : '';
+          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
           const tableData: any[] = [];
@@ -600,7 +630,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'YF', 'YJ', 'YB', 'N', 'S', 'L', 'T', 'FD', 'PP']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 30, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -619,7 +649,8 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(200, 16, 46);
-          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
+          const shiftInfo = unitData.shiftNumber && unitData.shiftNumber !== 'All' ? ` - Shift ${unitData.shiftNumber}` : '';
+          pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
           const tableData: any[] = [];
@@ -666,7 +697,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'NS', 'LA', 'TA', 'CA', 'CCA', 'FA', 'PPA', 'PFA', 'CVpA', 'HpA', 'CMTA', 'Total']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 7, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 6, cellPadding: 1.5, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 25, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -676,31 +707,53 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       } else if (activeTab === 'trend' && trendResponse) {
         const currentY = addHeader(pdf, `Uster Quantum Expert - ${PARAMETER_SHORT_NAMES[selectedParameter] || selectedParameter} Trend Report`);
         
-        const dates = trendResponse.dates || [];
-        const formattedDates = dates.map(d => {
-          try {
-            const [year, month, day] = d.split('-');
-            return `${day}-${month}-${year.slice(-2)}`;
-          } catch {
-            return d;
-          }
-        });
-
-        const firstColLabel = FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFirstColumn)?.label || 'Label';
-        const head = [[firstColLabel, ...formattedDates, '% Diff']];
+        const isShiftReport = trendResponse.reportType === 'shift';
+        const allKeys = trendResponse.allKeys || trendResponse.dates || [];
+        const baseDates = trendResponse.dates || [];
+        
+        // Build headers
+        let head: any[][] = [];
+        if (isShiftReport) {
+          // Complex header for shift report
+          const firstRow = [{ content: FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFirstColumn)?.label || 'Label', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } }];
+          const secondRow = [];
+          
+          baseDates.forEach(date => {
+            const shiftsForDate = allKeys.filter(k => k.startsWith(date));
+            firstRow.push({ 
+              content: formatDate(date), 
+              colSpan: shiftsForDate.length, 
+              styles: { halign: 'center' } 
+            } as any);
+            
+            shiftsForDate.forEach(key => {
+              secondRow.push({ 
+                content: `S${key.split('_')[1]}`, 
+                styles: { halign: 'center' } 
+              });
+            });
+          });
+          
+          firstRow.push({ content: '% Diff', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } } as any);
+          head = [firstRow, secondRow];
+        } else {
+          // Simple header for daily report
+          const formattedDates = baseDates.map(d => formatDate(d));
+          head = [[FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFirstColumn)?.label || 'Label', ...formattedDates, '% Diff']];
+        }
         
         const body = trendResponse.labels.map(label => {
           const rowData: any[] = [label];
-          dates.forEach(date => {
-            const dayData = trendResponse.data.find(d => d.date === date);
+          allKeys.forEach(key => {
+            const dayData = trendResponse.data.find(d => d.date === key);
             rowData.push(dayData ? dayData[label] : '-');
           });
 
           // Calculate % Diff
-          const oldestDate = dates[0];
-          const latestDate = dates[dates.length - 1];
-          const oldestVal = oldestDate ? trendResponse.data.find(d => d.date === oldestDate)?.[label] : undefined;
-          const latestVal = latestDate ? trendResponse.data.find(d => d.date === latestDate)?.[label] : undefined;
+          const oldestKey = allKeys[0];
+          const latestKey = allKeys[allKeys.length - 1];
+          const oldestVal = oldestKey ? trendResponse.data.find(d => d.date === oldestKey)?.[label] : undefined;
+          const latestVal = latestKey ? trendResponse.data.find(d => d.date === latestKey)?.[label] : undefined;
           
           let diffPercent = '-';
           if (oldestVal !== undefined && latestVal !== undefined) {
@@ -722,17 +775,20 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           head: head,
           body: body,
           theme: 'grid',
-          headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
-          bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
-          columnStyles: { 0: { cellWidth: 30, halign: 'center', fontStyle: 'bold' } },
+          headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 7, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
+          bodyStyles: { textColor: [0, 0, 0], fontSize: 6, cellPadding: 1.5, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
+          columnStyles: { 0: { cellWidth: orientation === 'l' ? 40 : 30, halign: 'center', fontStyle: 'bold' } },
           margin: { left: 14, right: 14 },
           didParseCell: (data) => {
-            if (data.section === 'body' && data.column.index === head[0].length - 1) {
+            const lastColIndex = isShiftReport ? allKeys.length + 1 : head[0].length - 1;
+            if (data.section === 'body' && data.column.index === lastColIndex) {
               const val = data.cell.raw as string;
-              if (val.startsWith('+')) {
-                data.cell.styles.textColor = [200, 16, 46];
-              } else if (val.startsWith('-')) {
-                data.cell.styles.textColor = [22, 163, 74];
+              if (val && typeof val === 'string') {
+                if (val.startsWith('+')) {
+                  data.cell.styles.textColor = [200, 16, 46];
+                } else if (val.startsWith('-')) {
+                  data.cell.styles.textColor = [22, 163, 74];
+                }
               }
             }
           }
@@ -886,11 +942,70 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                 </div>
                 <div className="flex space-x-3">
                   <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Report Type</h4>
+                    <div className="flex bg-[#F5F5F5] p-1 rounded-2xl h-[42px]">
+                      <button 
+                        onClick={() => setSelectedReportType('daily')}
+                        className={`flex-1 flex items-center justify-center rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                          selectedReportType === 'daily' ? 'bg-white text-uster-red shadow-sm' : 'text-gray-400'
+                        }`}
+                      >
+                        Daily
+                      </button>
+                      <button 
+                        onClick={() => setSelectedReportType('shift')}
+                        className={`flex-1 flex items-center justify-center rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                          selectedReportType === 'shift' ? 'bg-white text-uster-red shadow-sm' : 'text-gray-400'
+                        }`}
+                      >
+                        Shift
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Date Filter</h4>
+                    <SearchableMultiSelect
+                      options={availableFilters.dates}
+                      selectedValues={selectedTrendDates}
+                      onChange={setSelectedTrendDates}
+                      placeholder="Select Dates..."
+                    />
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">First Column Filter</h4>
                     <SearchableMultiSelect
                       options={getTrendValueOptions()}
                       selectedValues={selectedTrendValues}
                       onChange={setSelectedTrendValues}
                       placeholder={`Select ${FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFirstColumn)?.label || 'Values'}...`}
+                    />
+                  </div>
+                </div>
+                <div className="flex space-x-3 items-end">
+                  <div className="flex-1 relative">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Filter By</h4>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Settings size={14} /></div>
+                      <select 
+                        value={selectedFilterColumn} 
+                        onChange={(e) => {
+                          setSelectedFilterColumn(e.target.value);
+                          setSelectedFilterValues([]);
+                        }} 
+                        className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
+                      >
+                        {FIRST_COLUMN_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <SearchableMultiSelect
+                      options={getTrendValueOptions(selectedFilterColumn)}
+                      selectedValues={selectedFilterValues}
+                      onChange={setSelectedFilterValues}
+                      placeholder={`Select ${FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFilterColumn)?.label || 'Values'}...`}
                     />
                   </div>
                 </div>

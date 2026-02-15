@@ -47,8 +47,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ data, loading, formatDate
             <Activity size={40} className="text-[#C8102E]" />
           </div>
           <p className="text-[11px] font-black text-[#C8102E] uppercase tracking-widest mb-1 text-center leading-tight">
-            {item.unit} ( {item.shiftStartTime ? formatDate(item.shiftStartTime) : ''} )
-
+            {item.unit} ({item.shiftStartTime ? formatDate(item.shiftStartTime) : ''}{item.shiftNumber && item.shiftNumber !== 'All' ? ` - S${item.shiftNumber}` : ''})
           </p>
           <p className="text-xl font-black text-[#1f2937]">
             YF : {formatOneDecimal(item.yarnFaults)}

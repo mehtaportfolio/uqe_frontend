@@ -9,6 +9,13 @@ export interface MachineCutData {
   TCuts: string;
   FDCuts: string;
   PPCuts: string;
+  Thin50?: string;
+  Thick50?: string;
+  Nep200?: string;
+  CVAvg?: string;
+  HAvg?: string;
+  IPI?: string;
+  HSIPI?: string;
   totalAlarms?: number;
   alarmBreakdown?: Record<string, number>;
 }
@@ -39,6 +46,7 @@ export interface ArticleCutData {
 export interface LiveReportData {
   unit: string;
   shiftStartTime?: string;
+  shiftNumber?: string | number;
   yarnFaults: number;
   totalAlarms: number;
   alarmsPer1000km: number;
@@ -59,6 +67,8 @@ export interface TrendResponse {
   data: TrendDataPoint[];
   labels: string[];
   dates?: string[];
+  allKeys?: string[];
+  reportType?: 'daily' | 'shift';
   drillDownData?: Record<string, {
     labels: string[];
     data: TrendDataPoint[];
