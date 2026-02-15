@@ -19,7 +19,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ data, loading, formatDate
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E30613] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#C8102E] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -41,19 +41,19 @@ const DashboardView: React.FC<DashboardViewProps> = ({ data, loading, formatDate
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
           key={item.unit}
-          className="bg-[#ffffff] p-6 rounded-3xl shadow-md border-b-4 border-[#E30613] flex flex-col items-center justify-center relative overflow-hidden"
+          className="bg-[#ffffff] p-6 rounded-3xl shadow-md border-b-4 border-[#C8102E] flex flex-col items-center justify-center relative overflow-hidden"
         >
           <div className="absolute top-2 right-2 opacity-10">
-            <Activity size={40} className="text-[#E30613]" />
+            <Activity size={40} className="text-[#C8102E]" />
           </div>
-          <p className="text-[11px] font-black text-[#E30613] uppercase tracking-widest mb-1 text-center leading-tight">
+          <p className="text-[11px] font-black text-[#C8102E] uppercase tracking-widest mb-1 text-center leading-tight">
             {item.unit} ( {item.shiftStartTime ? formatDate(item.shiftStartTime) : ''} )
 
           </p>
           <p className="text-xl font-black text-[#1f2937]">
             YF : {formatOneDecimal(item.yarnFaults)}
           </p>
-          <p className="text-sm font-bold text-[#E30613] mt-1">
+          <p className="text-sm font-bold text-[#C8102E] mt-1">
             Alarms : {formatOneDecimal(item.totalAlarms)}
           </p>
           <p className="text-[10px] font-bold text-[#6b7280] mt-1">

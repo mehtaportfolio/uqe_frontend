@@ -116,7 +116,7 @@ const SearchableMultiSelect: React.FC<{
         </span>
         <div className="flex items-center space-x-1">
           {selectedValues.length > 0 && (
-            <X size={14} className="text-gray-400 hover:text-red-600" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
+            <X size={14} className="text-gray-400 hover:text-uster-red" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
           )}
           <Search size={14} className="text-gray-400" />
         </div>
@@ -151,7 +151,7 @@ const SearchableMultiSelect: React.FC<{
                     className="flex items-center justify-between px-4 py-2.5 hover:bg-red-50 cursor-pointer transition-colors"
                   >
                     <span className="text-xs font-bold text-gray-700">{opt}</span>
-                    {selectedValues.includes(opt) && <Check size={14} className="text-red-600" />}
+                    {selectedValues.includes(opt) && <Check size={14} className="text-uster-red" />}
                   </div>
                 ))
               )}
@@ -180,10 +180,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
     setMainTab(initialTab);
     if (initialTab === 'dashboard') {
       setActiveTab('dashboard');
+      // Reset date to empty when switching to dashboard so it triggers the "yesterday" default
+      setSelectedDate('');
     } else if (activeTab === 'dashboard') {
       setActiveTab('cuts');
     }
-  }, [initialTab, activeTab]);
+  }, [initialTab]);
 
   const [availableFilters, setAvailableFilters] = useState<{ 
     dates: string[], 
@@ -250,6 +252,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       const params = new URLSearchParams();
       if (selectedDate) params.append('date', selectedDate);
       if (selectedShift) params.append('shift', selectedShift);
+      if (mainTab === 'dashboard') params.append('mode', 'dashboard');
       
       // Only apply unit and machine filters if NOT on the dashboard
       if (activeTab !== 'dashboard') {
@@ -362,7 +365,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       const addHeader = (doc: jsPDF, title: string) => {
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(227, 6, 19);
+        doc.setTextColor(200, 16, 46);
         doc.text(title, 14, 15);
 
         doc.setFontSize(9);
@@ -395,9 +398,78 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           useCORS: true,
           backgroundColor: '#F5F5F5',
           onclone: (clonedDoc) => {
-            const rawHtml = clonedDoc.documentElement.innerHTML;
-            if (rawHtml.includes('oklch')) {
-              clonedDoc.documentElement.innerHTML = rawHtml.replace(/oklch\([^)]+\)/g, '#dc2626');
+            try {
+              // 1. Remove all style tags and links to external CSS that might contain modern CSS
+              const styles = clonedDoc.getElementsByTagName('style');
+              for (let i = styles.length - 1; i >= 0; i--) {
+                styles[i].remove();
+              }
+              const links = clonedDoc.getElementsByTagName('link');
+              for (let i = links.length - 1; i >= 0; i--) {
+                if (links[i].rel === 'stylesheet') links[i].remove();
+              }
+
+              // 2. Inject a simple baseline CSS for the report components
+              const style = clonedDoc.createElement('style');
+              style.innerHTML = `
+                * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
+                body { font-family: sans-serif; background: #F5F5F5; }
+                .grid { display: grid; }
+                .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                .gap-4 { gap: 1rem; }
+                .bg-white { background-color: #ffffff; }
+                .bg-\\[\\#ffffff\\] { background-color: #ffffff; }
+                .p-6 { padding: 1.5rem; }
+                .rounded-3xl { border-radius: 1.5rem; }
+                .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+                .border-b-4 { border-bottom-width: 4px; }
+                .border-\\[\\#E30613\\] { border-color: #E30613; }
+                .text-\\[\\#E30613\\] { color: #E30613; }
+                .text-\\[\\#1f2937\\] { color: #1f2937; }
+                .text-\\[\\#6b7280\\] { color: #6b7280; }
+                .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+                .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+                .text-\\[11px\\] { font-size: 11px; }
+                .text-\\[10px\\] { font-size: 10px; }
+                .font-black { font-weight: 900; }
+                .font-bold { font-weight: 700; }
+                .uppercase { text-transform: uppercase; }
+                .tracking-widest { letter-spacing: 0.1em; }
+                .flex { display: flex; }
+                .flex-col { flex-direction: column; }
+                .items-center { align-items: center; }
+                .justify-center { justify-content: center; }
+                .relative { position: relative; }
+                .overflow-hidden { overflow: hidden; }
+                .absolute { position: absolute; }
+                .top-2 { top: 0.5rem; }
+                .right-2 { right: 0.5rem; }
+                .opacity-10 { opacity: 0.1; }
+                .mb-1 { margin-bottom: 0.25rem; }
+                .mt-1 { margin-top: 0.25rem; }
+                .text-center { text-align: center; }
+                .leading-tight { line-height: 1.25; }
+              `;
+              clonedDoc.head.appendChild(style);
+
+              // 3. Clean up any remaining oklch in inline styles without using innerHTML replacement
+              const allElements = clonedDoc.getElementsByTagName('*');
+              for (let i = 0; i < allElements.length; i++) {
+                const el = allElements[i] as HTMLElement;
+                if (el.style) {
+                  const styleStr = el.getAttribute('style') || '';
+                  if (styleStr.includes('oklch') || styleStr.includes('color-mix') || styleStr.includes('light-dark')) {
+                    const p = '(?:[^()]+|\\([^()]*\\))';
+                    const processed = styleStr
+                      .replace(new RegExp(`oklch\\s*\\(${p}*\\)`, 'gi'), '#dc2626')
+                      .replace(new RegExp(`color-mix\\s*\\(${p}*\\)`, 'gi'), '#dc2626')
+                      .replace(new RegExp(`light-dark\\s*\\(${p}*\\)`, 'gi'), '#dc2626');
+                    el.setAttribute('style', processed);
+                  }
+                }
+              }
+            } catch (e) {
+              console.error("Error in html2canvas onclone:", e);
             }
           }
         });
@@ -408,7 +480,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, 'PNG', 10, startY, pdfWidth, pdfHeight);
       } else if (activeTab === 'quality') {
-        let currentY = addHeader(pdf, `Uster Quantum Expert - Live Quality Report`);
+        let currentY = addHeader(pdf, `Uster Quantum Expert - Quality Report`);
         
         const formatOneDecimal = (val: string | number | undefined | null) => {
           if (val === undefined || val === null || val === '') return '0.0';
@@ -425,12 +497,12 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
         data.forEach((unitData, index) => {
           if (index > 0) {
             pdf.addPage();
-            currentY = addHeader(pdf, `Uster Quantum Expert - Live Quality Report`);
+            currentY = addHeader(pdf, `Uster Quantum Expert - Quality Report`);
           }
 
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
-          pdf.setTextColor(227, 6, 19);
+          pdf.setTextColor(200, 16, 46);
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
           currentY += 10;
 
@@ -453,14 +525,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           });
 
           tableData.push([
-            { content: 'Overall Average', styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatRound(unitData.unitQuality?.Thin50), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatRound(unitData.unitQuality?.Thick50), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatRound(unitData.unitQuality?.Nep200), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatOneDecimal(unitData.unitQuality?.CVAvg), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatOneDecimal(unitData.unitQuality?.HAvg), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatRound(unitData.unitQuality?.IPI), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: formatRound(unitData.unitQuality?.HSIPI), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } }
+            { content: 'Overall Average', styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatRound(unitData.unitQuality?.Thin50), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatRound(unitData.unitQuality?.Thick50), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatRound(unitData.unitQuality?.Nep200), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatOneDecimal(unitData.unitQuality?.CVAvg), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatOneDecimal(unitData.unitQuality?.HAvg), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatRound(unitData.unitQuality?.IPI), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: formatRound(unitData.unitQuality?.HSIPI), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } }
           ]);
 
           autoTable(pdf, {
@@ -468,7 +540,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'Thin50', 'Thick50', 'Nep200', 'CV%', 'H', 'IPI', 'HS IPI']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 30, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -476,17 +548,17 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           currentY = (pdf as any).lastAutoTable.finalY + 10;
         });
       } else if (activeTab === 'cuts') {
-        let currentY = addHeader(pdf, `Uster Quantum Expert - Live Cuts Report`);
+        let currentY = addHeader(pdf, `Uster Quantum Expert - Cuts Report`);
         
         data.forEach((unitData, index) => {
           if (index > 0) {
             pdf.addPage();
-            currentY = addHeader(pdf, `Uster Quantum Expert - Live Cuts Report`);
+            currentY = addHeader(pdf, `Uster Quantum Expert - Cuts Report`);
           }
 
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
-          pdf.setTextColor(227, 6, 19);
+          pdf.setTextColor(200, 16, 46);
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
           currentY += 10;
 
@@ -511,16 +583,16 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           });
 
           tableData.push([
-            { content: 'Overall Average', styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.YarnFaults)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.YarnJoints)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.YarnBreaks)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.NCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.SCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.LCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.TCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.FDCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: Math.round(Number(unitData.unitCuts?.PPCuts)), styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } }
+            { content: 'Overall Average', styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.YarnFaults)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.YarnJoints)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.YarnBreaks)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.NCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.SCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.LCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.TCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.FDCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: Math.round(Number(unitData.unitCuts?.PPCuts)), styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } }
           ]);
 
           autoTable(pdf, {
@@ -528,7 +600,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'YF', 'YJ', 'YB', 'N', 'S', 'L', 'T', 'FD', 'PP']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 30, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -536,17 +608,17 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           currentY = (pdf as any).lastAutoTable.finalY + 10;
         });
       } else if (activeTab === 'alarms') {
-        let currentY = addHeader(pdf, `Uster Quantum Expert - Live Alarms Report`);
+        let currentY = addHeader(pdf, `Uster Quantum Expert - Alarms Report`);
 
         data.forEach((unitData, index) => {
           if (index > 0) {
             pdf.addPage();
-            currentY = addHeader(pdf, `Uster Quantum Expert - Live Alarms Report`);
+            currentY = addHeader(pdf, `Uster Quantum Expert - Alarms Report`);
           }
 
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
-          pdf.setTextColor(227, 6, 19);
+          pdf.setTextColor(200, 16, 46);
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}`, 14, currentY + 5);
           currentY += 10;
 
@@ -574,19 +646,19 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           });
 
           tableData.push([
-            { content: 'Overall Total', styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.NSABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.LABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.TABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.CABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.CCABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.FABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.PPABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.PFABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.CVpABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.HpABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.alarmBreakdown?.CMTABlks || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } },
-            { content: unitData.totalAlarms || 0, styles: { fontStyle: 'bold', textColor: [227, 6, 19], halign: 'center' } }
+            { content: 'Overall Total', styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.NSABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.LABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.TABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.CABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.CCABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.FABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.PPABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.PFABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.CVpABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.HpABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.alarmBreakdown?.CMTABlks || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } },
+            { content: unitData.totalAlarms || 0, styles: { fontStyle: 'bold', textColor: [200, 16, 46], halign: 'center' } }
           ]);
 
           autoTable(pdf, {
@@ -594,7 +666,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             head: [[viewMode === 'article' ? 'Article' : 'Machine', 'NS', 'LA', 'TA', 'CA', 'CCA', 'FA', 'PPA', 'PFA', 'CVpA', 'HpA', 'CMTA', 'Total']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
+            headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 7, halign: 'center' },
             bodyStyles: { textColor: [0, 0, 0], fontSize: 6, cellPadding: 1.5, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
             columnStyles: { 0: { cellWidth: 25, halign: 'center' } },
             margin: { left: 14, right: 14 }
@@ -602,14 +674,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           currentY = (pdf as any).lastAutoTable.finalY + 10;
         });
       } else if (activeTab === 'trend' && trendResponse) {
-        let currentY = addHeader(pdf, `Uster Quantum Expert - ${PARAMETER_SHORT_NAMES[selectedParameter] || selectedParameter} Trend Report`);
+        const currentY = addHeader(pdf, `Uster Quantum Expert - ${PARAMETER_SHORT_NAMES[selectedParameter] || selectedParameter} Trend Report`);
         
         const dates = trendResponse.dates || [];
         const formattedDates = dates.map(d => {
           try {
             const [year, month, day] = d.split('-');
             return `${day}-${month}-${year.slice(-2)}`;
-          } catch (e) {
+          } catch {
             return d;
           }
         });
@@ -650,7 +722,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           head: head,
           body: body,
           theme: 'grid',
-          headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+          headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
           bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
           columnStyles: { 0: { cellWidth: 30, halign: 'center', fontStyle: 'bold' } },
           margin: { left: 14, right: 14 },
@@ -658,7 +730,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             if (data.section === 'body' && data.column.index === head[0].length - 1) {
               const val = data.cell.raw as string;
               if (val.startsWith('+')) {
-                data.cell.styles.textColor = [227, 6, 19];
+                data.cell.styles.textColor = [200, 16, 46];
               } else if (val.startsWith('-')) {
                 data.cell.styles.textColor = [22, 163, 74];
               }
@@ -690,7 +762,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
 
   return (
     <div className="flex-1 flex flex-col bg-[#F5F5F5] min-h-screen">
-      <header className="bg-red-600 px-6 pt-4 pb-2 rounded-b-[32px] shadow-lg sticky top-0 z-20">
+      <header className="bg-uster-red px-6 pt-4 pb-2 rounded-b-[32px] shadow-lg sticky top-0 z-20">
         <div className="flex justify-between items-center mb-4">
           <button onClick={onBack} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
             <Home className="text-white" size={20} />
@@ -725,8 +797,8 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                   data-active={activeTab === tab.id}
                   className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all shadow-sm ${
                     activeTab === tab.id 
-                      ? 'bg-red-700 text-white font-black' 
-                      : 'bg-white text-red-600 font-bold hover:bg-gray-50'
+                      ? 'bg-uster-red-dark text-white font-black' 
+                      : 'bg-white text-uster-red font-bold hover:bg-gray-50'
                   }`}
                 >
                   <tab.icon size={14} />
@@ -744,13 +816,13 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Filters</h3>
             <div className="flex items-center space-x-4">
               {activeTab !== 'dashboard' && activeTab !== 'trend' && (
-                <button onClick={() => setViewMode(prev => prev === 'article' ? 'machine' : 'article')} className="flex items-center space-x-1 text-red-600 group">
+                <button onClick={() => setViewMode(prev => prev === 'article' ? 'machine' : 'article')} className="flex items-center space-x-1 text-uster-red group">
                   <Repeat size={12} className={`transition-transform duration-300 ${viewMode === 'machine' ? 'rotate-180' : ''}`} />
                   <span className="text-[10px] font-black uppercase tracking-wider">{viewMode === 'article' ? 'Machine View' : 'Article View'}</span>
                 </button>
               )}
               {(selectedDate || selectedShift || selectedUnit || selectedMachine) && (
-                <button onClick={resetFilters} className="flex items-center space-x-1 text-red-600 group">
+                <button onClick={resetFilters} className="flex items-center space-x-1 text-uster-red group">
                   <RotateCcw size={12} className="group-hover:rotate-[-45deg] transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-wider">Reset</span>
                 </button>
@@ -764,7 +836,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                 <div className="flex space-x-3">
                   <div className="flex-1 relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Activity size={14} /></div>
-                    <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+                    <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                       <option value="">All Units</option>
                       {availableFilters.units.map(unit => <option key={unit} value={unit}>{unit}</option>)}
                     </select>
@@ -777,7 +849,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                         setSelectedTrendGroup(e.target.value);
                         setSelectedParameter(DEFAULT_GROUP_PARAMETERS[e.target.value]);
                       }} 
-                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
                     >
                       {TREND_GROUPS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
                     </select>
@@ -792,7 +864,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                         setSelectedFirstColumn(e.target.value);
                         setSelectedTrendValues([]);
                       }} 
-                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
                     >
                       {FIRST_COLUMN_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
                     </select>
@@ -802,7 +874,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                     <select 
                       value={selectedParameter} 
                       onChange={(e) => setSelectedParameter(e.target.value)} 
-                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                      className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
                     >
                       {GROUP_PARAMETERS[selectedTrendGroup].map(opt => (
                         <option key={opt} value={opt}>
@@ -826,14 +898,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                   <button 
                     onClick={fetchTrendData}
                     disabled={trendLoading}
-                    className="flex-1 bg-red-600 text-white font-black uppercase tracking-widest py-3 rounded-2xl shadow-lg shadow-red-600/20 active:scale-95 transition-all disabled:opacity-50"
+                    className="flex-1 bg-uster-red text-white font-black uppercase tracking-widest py-3 rounded-2xl shadow-lg shadow-uster-red/20 active:scale-95 transition-all disabled:opacity-50"
                   >
                     {trendLoading ? 'Loading...' : 'Show Data'}
                   </button>
                   <button 
                     onClick={() => setHideEmptyLatest(!hideEmptyLatest)}
                     className={`w-12 flex items-center justify-center rounded-2xl transition-all ${
-                      hideEmptyLatest ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-[#F5F5F5] text-gray-400'
+                      hideEmptyLatest ? 'bg-uster-red text-white shadow-lg shadow-uster-red/20' : 'bg-[#F5F5F5] text-gray-400'
                     }`}
                     title={hideEmptyLatest ? "Showing rows with latest data" : "Showing all rows"}
                   >
@@ -846,14 +918,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                 <div className="flex space-x-3">
                   <div className="flex-1 relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Calendar size={14} /></div>
-                    <select value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+                    <select value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                       <option value="">Default Date</option>
                       {availableFilters.dates.map(date => <option key={date} value={date}>{date}</option>)}
                     </select>
                   </div>
                   <div className="flex-1 relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Layers size={14} /></div>
-                    <select value={selectedShift} onChange={(e) => setSelectedShift(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+                    <select value={selectedShift} onChange={(e) => setSelectedShift(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                       <option value="all">All Shifts</option>
                       {availableFilters.shifts.map(shift => <option key={shift} value={shift}>Shift {shift}</option>)}
                     </select>
@@ -864,14 +936,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                   <div className="flex space-x-3">
                     <div className="flex-1 relative">
                       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Activity size={14} /></div>
-                      <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+                      <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                         <option value="">All Units</option>
                         {availableFilters.units.map(unit => <option key={unit} value={unit}>{unit}</option>)}
                       </select>
                     </div>
                     <div className="flex-1 relative">
                       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Settings size={14} /></div>
-                      <select value={selectedMachine} onChange={(e) => setSelectedMachine(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+                      <select value={selectedMachine} onChange={(e) => setSelectedMachine(e.target.value)} className="w-full bg-[#F5F5F5] border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                         <option value="">All Machines</option>
                         {availableFilters.machines.map(machine => <option key={machine} value={machine}>{machine}</option>)}
                       </select>

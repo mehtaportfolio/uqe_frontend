@@ -73,19 +73,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center p-6 font-sans select-none">
+      <div className="w-full max-w-md mb-8 flex justify-center">
+        <img 
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Logo_Uster.svg/1024px-Logo_Uster.svg.png" 
+          alt="Uster Logo" 
+          className="w-full max-w-[200px] h-auto"
+        />
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-[40px] shadow-xl overflow-hidden"
       >
-        <div className="bg-red-600 p-10 flex flex-col items-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md mb-4">
-            <ShieldCheck className="text-white" size={32} />
-          </div>
-          <h1 className="text-2xl font-black text-white uppercase tracking-tight text-center">
-            Uster Quantum
+        <div className="bg-uster-red p-10 flex flex-col items-center">
+          <h1 className="text-xl font-bold text-white uppercase tracking-[0.2em] text-center">
+            Mobile Dashboard
           </h1>
-          <p className="text-red-100 text-sm mt-2">Enter password to access dashboard</p>
+          <p className="text-white/70 text-xs mt-2 uppercase tracking-widest font-medium">Secure Access</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -98,7 +103,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter Password"
-              className="block w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all text-lg font-bold placeholder:font-medium"
+              className="block w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-uster-red focus:bg-white transition-all text-lg font-bold placeholder:font-medium"
               required
             />
           </div>
@@ -107,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center space-x-2 text-red-600 bg-red-50 p-4 rounded-xl border border-red-100"
+              className="flex items-center space-x-2 text-uster-red bg-red-50 p-4 rounded-xl border border-red-100"
             >
               <AlertCircle size={18} />
               <p className="text-xs font-bold uppercase tracking-wide">{error}</p>
@@ -117,7 +122,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
+            className="w-full bg-uster-red text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-uster-red/20 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
           >
             {loading ? (
               <div className="w-5 h-5 sm:w-6 sm:h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>

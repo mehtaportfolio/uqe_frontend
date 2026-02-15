@@ -132,7 +132,7 @@ const App: React.FC = () => {
     return (
       <>
         {/* Header */}
-        <header className="bg-red-600 px-6 pt-4 pb-12 rounded-b-[40px] shadow-lg">
+        <header className="bg-uster-red px-6 pt-4 pb-12 rounded-b-[40px] shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
               <Home className="text-white" size={20} />
@@ -157,14 +157,14 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="text-white">
-            <p className="text-red-100 text-sm font-medium">Welcome back,</p>
+            <p className="text-white/70 text-sm font-medium">Welcome back,</p>
             <h1 className="text-2xl font-black uppercase tracking-tight">Uster Quantum Report</h1>
           </div>
         </header>
 
         {/* Unit Header */}
         <div className="px-6 -mt-8">
-          <div className="bg-white p-4 rounded-2xl shadow-md border-l-4 border-red-600 flex justify-between items-center">
+          <div className="bg-white p-4 rounded-2xl shadow-md border-l-4 border-uster-red flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Active Unit</p>
               <h2 className="text-2xl font-black text-gray-800">{currentUnitData.unit || 'Loading...'}</h2>
@@ -193,7 +193,7 @@ const App: React.FC = () => {
                     className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden h-32"
                   >
                     <div className="absolute -right-4 -top-4 w-16 h-16 bg-red-50 rounded-full opacity-50"></div>
-                    <p className="text-[24px] font-black text-red-600 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
+                    <p className="text-[24px] font-black text-uster-red uppercase tracking-[0.2em] mb-2">{stat.label}</p>
                     <p className="text-3xl font-black text-gray-800">{stat.value}</p>
                   </motion.div>
                 ))}
@@ -204,7 +204,7 @@ const App: React.FC = () => {
 
         {loading && (
           <main className="flex-1 px-6 pt-12 flex flex-col items-center justify-start opacity-50">
-             <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+             <div className="w-12 h-12 border-4 border-uster-red border-t-transparent rounded-full animate-spin mb-4"></div>
              <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Fetching latest reports...</p>
           </main>
         )}
@@ -228,7 +228,7 @@ const App: React.FC = () => {
           <button 
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex flex-col items-center space-y-1 transition-all ${activeTab === tab.id ? 'text-red-600' : 'text-black'}`}
+            className={`flex flex-col items-center space-y-1 transition-all ${activeTab === tab.id ? 'text-uster-red' : 'text-black'}`}
           >
             <div className={`p-2 rounded-xl transition-all ${activeTab === tab.id ? 'bg-red-50' : ''}`}>
               <tab.icon size={24} />

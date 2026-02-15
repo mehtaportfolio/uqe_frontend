@@ -95,7 +95,7 @@ const SearchableMultiSelect: React.FC<{
         </span>
         <div className="flex items-center space-x-1">
           {selectedValues.length > 0 && (
-            <X size={14} className="text-gray-400 hover:text-red-600" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
+            <X size={14} className="text-gray-400 hover:text-uster-red" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
           )}
           <Search size={14} className="text-gray-400" />
         </div>
@@ -130,7 +130,7 @@ const SearchableMultiSelect: React.FC<{
                     className="flex items-center justify-between px-4 py-2.5 hover:bg-red-50 cursor-pointer transition-colors"
                   >
                     <span className="text-xs font-bold text-gray-700">{opt}</span>
-                    {selectedValues.includes(opt) && <Check size={14} className="text-red-600" />}
+                    {selectedValues.includes(opt) && <Check size={14} className="text-uster-red" />}
                   </div>
                 ))
               )}
@@ -339,7 +339,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
                   type="date" 
                   value={startDate} 
                   onChange={(e) => setStartDate(e.target.value)} 
-                  className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer" 
+                  className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer" 
                 />
               </div>
             </div>
@@ -351,7 +351,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
                   type="date" 
                   value={endDate} 
                   onChange={(e) => setEndDate(e.target.value)} 
-                  className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer" 
+                  className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer" 
                 />
               </div>
             </div>
@@ -360,7 +360,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
           <div className="flex space-x-3">
             <div className="flex-1 relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Activity size={14} /></div>
-              <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer">
+              <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer">
                 <option value="">All Units</option>
                 {availableUnits.map(unit => <option key={unit} value={unit}>{unit}</option>)}
               </select>
@@ -373,7 +373,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
                   setSelectedTrendGroup(e.target.value);
                   setSelectedParameter(DEFAULT_GROUP_PARAMETERS[e.target.value]);
                 }} 
-                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
               >
                 {TREND_GROUPS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
               </select>
@@ -388,7 +388,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
                   setSelectedFirstColumn(e.target.value);
                   setSelectedTrendValues([]);
                 }} 
-                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
               >
                 {FIRST_COLUMN_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
               </select>
@@ -398,7 +398,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
               <select 
                 value={selectedParameter} 
                 onChange={(e) => setSelectedParameter(e.target.value)} 
-                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-red-600/20 transition-all cursor-pointer"
+                className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-uster-red/20 transition-all cursor-pointer"
               >
                 {GROUP_PARAMETERS[selectedTrendGroup].map(opt => (
                   <option key={opt} value={opt}>
@@ -422,14 +422,14 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
             <button 
               onClick={handleShowData}
               disabled={trendLoading || loading}
-              className="flex-1 bg-red-600 text-white font-black uppercase tracking-widest py-3 rounded-2xl shadow-lg shadow-red-600/20 active:scale-95 transition-all disabled:opacity-50"
+              className="flex-1 bg-uster-red text-white font-black uppercase tracking-widest py-3 rounded-2xl shadow-lg shadow-uster-red/20 active:scale-95 transition-all disabled:opacity-50"
             >
               {trendLoading || loading ? 'Loading Data...' : 'Show Data'}
             </button>
             <button 
               onClick={() => setHideEmptyLatest(!hideEmptyLatest)}
               className={`w-12 flex items-center justify-center rounded-2xl transition-all ${
-                hideEmptyLatest ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-50 text-gray-400'
+                hideEmptyLatest ? 'bg-uster-red text-white shadow-lg shadow-uster-red/20' : 'bg-gray-50 text-gray-400'
               }`}
               title={hideEmptyLatest ? "Showing rows with latest data" : "Showing all rows"}
             >

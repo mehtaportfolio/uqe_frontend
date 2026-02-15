@@ -106,7 +106,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-sans select-none relative">
       {/* Header */}
-      <header className="bg-red-600 px-6 pt-4 pb-12 rounded-b-[40px] shadow-lg">
+      <header className="bg-uster-red px-6 pt-4 pb-12 rounded-b-[40px] shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <button 
             onClick={onBack}
@@ -135,7 +135,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
               className="w-full bg-gray-50 hover:bg-gray-100 text-gray-800 p-4 sm:p-6 rounded-2xl flex items-center justify-between border-2 border-gray-100 transition-all group"
             >
               <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center text-uster-red group-hover:scale-110 transition-transform">
                   <Key size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div className="text-left">
@@ -192,7 +192,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="fixed inset-x-6 top-[20%] bg-white rounded-[40px] shadow-2xl z-[201] overflow-hidden"
             >
-              <div className="bg-red-600 p-6 flex justify-between items-center">
+              <div className="bg-uster-red p-6 flex justify-between items-center">
                 <h2 className="text-xl font-black text-white uppercase tracking-tight">Change Password</h2>
                 <button 
                   onClick={() => setIsModalOpen(false)}
@@ -215,7 +215,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="New Password"
-                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
+                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-uster-red focus:bg-white transition-all font-bold"
                         required
                       />
                     </div>
@@ -232,7 +232,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm New Password"
-                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-red-600 focus:bg-white transition-all font-bold"
+                        className="block w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-uster-red focus:bg-white transition-all font-bold"
                         required
                       />
                     </div>
@@ -242,7 +242,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 sm:p-4 rounded-xl border border-red-100"
+                      className="flex items-center space-x-2 text-uster-red bg-red-50 p-3 sm:p-4 rounded-xl border border-red-100"
                     >
                       <AlertCircle size={18} />
                       <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide">{error}</p>
@@ -263,7 +263,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack, currentPassword }) => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-red-600 text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
+                    className="w-full bg-uster-red text-white py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center"
                   >
                     {loading ? (
                       <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>

@@ -54,7 +54,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
       const addHeader = (doc: jsPDF, title: string) => {
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(227, 6, 19);
+        doc.setTextColor(200, 16, 46);
         doc.text(title, 14, 15);
 
         doc.setFontSize(9);
@@ -98,7 +98,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           head: head,
           body: body,
           theme: 'grid',
-          headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+          headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
           bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
           margin: { left: 14, right: 14 }
         });
@@ -158,7 +158,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           head: head,
           body: body,
           theme: 'grid',
-          headStyles: { fillColor: [227, 6, 19], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
+          headStyles: { fillColor: [200, 16, 46], textColor: [255, 255, 255], fontSize: 8, halign: 'center' },
           bodyStyles: { textColor: [0, 0, 0], fontSize: 7, cellPadding: 2, halign: 'center', lineColor: [0, 0, 0], lineWidth: 0.1 },
           columnStyles: { 0: { cellWidth: 30, halign: 'center', fontStyle: 'bold' } },
           margin: { left: 14, right: 14 }
@@ -240,7 +240,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex flex-col font-sans text-gray-900 select-none pb-24">
       {/* Header */}
-      <header className="bg-red-600 px-6 pt-4 pb-4 rounded-b-[40px] shadow-lg sticky top-0 z-[100]">
+      <header className="bg-uster-red px-6 pt-4 pb-4 rounded-b-[40px] shadow-lg sticky top-0 z-[100]">
         <div className="flex justify-between items-center mb-4">
           <motion.button 
             onClick={onBack}
@@ -278,7 +278,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           <button 
             onClick={() => setActiveTab('search')}
             className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-xl transition-all ${
-              activeTab === 'search' ? 'bg-red-600 text-white shadow-md' : 'text-gray-400'
+              activeTab === 'search' ? 'bg-uster-red text-white shadow-md' : 'text-gray-400'
             }`}
           >
             <Search size={18} />
@@ -287,7 +287,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           <button 
             onClick={() => setActiveTab('trend')}
             className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-xl transition-all ${
-              activeTab === 'trend' ? 'bg-red-600 text-white shadow-md' : 'text-gray-400'
+              activeTab === 'trend' ? 'bg-uster-red text-white shadow-md' : 'text-gray-400'
             }`}
           >
             <BarChart3 size={18} />

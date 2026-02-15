@@ -49,7 +49,7 @@ const SearchableMultiSelect: React.FC<{
         </span>
         <div className="flex items-center space-x-1">
           {selectedValues.length > 0 && (
-            <X size={14} className="text-gray-400 hover:text-red-600" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
+            <X size={14} className="text-gray-400 hover:text-uster-red" onClick={(e) => { e.stopPropagation(); onChange([]); }} />
           )}
           <Search size={14} className="text-gray-400" />
         </div>
@@ -84,7 +84,7 @@ const SearchableMultiSelect: React.FC<{
                     className="flex items-center justify-between px-4 py-2.5 hover:bg-red-50 cursor-pointer transition-colors"
                   >
                     <span className="text-xs font-bold text-gray-700">{opt}</span>
-                    {selectedValues.includes(opt) && <Check size={14} className="text-red-600" />}
+                    {selectedValues.includes(opt) && <Check size={14} className="text-uster-red" />}
                   </div>
                 ))
               )}
@@ -334,7 +334,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
       startY: 30,
       head: headers,
       body: body,
-      headStyles: { fillColor: [192, 0, 0] },
+      headStyles: { fillColor: [200, 16, 46] },
       styles: { fontSize: 8, halign: 'center' },
       columnStyles: { 0: { halign: 'left' } }
     });
@@ -355,7 +355,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
               type="date" 
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-red-600 focus:ring-2 focus:ring-red-500"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-uster-red focus:ring-2 focus:ring-uster-red"
             />
           </div>
           <div className="space-y-1">
@@ -364,7 +364,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
               type="date" 
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-red-600 focus:ring-2 focus:ring-red-500"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-uster-red focus:ring-2 focus:ring-uster-red"
             />
           </div>
         </div>
@@ -373,7 +373,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
           <button 
             onClick={() => onLoadData(startDate, endDate)}
             disabled={loading || !startDate || !endDate}
-            className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold text-sm shadow-md shadow-red-200 active:scale-95 transition-transform disabled:opacity-50"
+            className="flex-1 bg-uster-red text-white py-3 rounded-xl font-bold text-sm shadow-md shadow-red-200 active:scale-95 transition-transform disabled:opacity-50"
           >
             {loading ? 'Loading...' : 'Load Data'}
           </button>
@@ -393,12 +393,12 @@ const SearchTab: React.FC<SearchTabProps> = ({
               placeholder="Lot IDs (comma separated)"
               value={lotInput}
               onChange={(e) => setLotInput(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold focus:ring-2 focus:ring-red-500 pr-10"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold focus:ring-2 focus:ring-uster-red pr-10"
             />
             {lotInput && (
               <button 
                 onClick={() => setLotInput('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-uster-red"
               >
                 <X size={14} />
               </button>
@@ -419,12 +419,12 @@ const SearchTab: React.FC<SearchTabProps> = ({
               placeholder="Type Article Number..."
               value={articleInput}
               onChange={(e) => setArticleInput(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold focus:ring-2 focus:ring-red-500 pr-10"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold focus:ring-2 focus:ring-uster-red pr-10"
             />
             {articleInput && (
               <button 
                 onClick={() => { setArticleInput(''); setArticleSuggestions([]); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-uster-red"
               >
                 <X size={14} />
               </button>
@@ -452,7 +452,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
             <button 
               onClick={handleApplyArticles}
               disabled={selectedArticles.length === 0}
-              className="bg-red-600 text-white px-4 py-3 rounded-xl font-bold text-xs shadow-md shadow-red-200 active:scale-95 transition-transform disabled:opacity-50"
+              className="bg-uster-red text-white px-4 py-3 rounded-xl font-bold text-xs shadow-md shadow-red-200 active:scale-95 transition-transform disabled:opacity-50"
             >
               Apply
             </button>
@@ -468,7 +468,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
             <select 
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-red-500"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red"
             >
               {groupByOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
             </select>
@@ -478,7 +478,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
             <select 
               value={filterField}
               onChange={(e) => { setFilterField(e.target.value); setSelectedFilterValues([]); }}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-red-500"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red"
             >
               <option value="">No Filter</option>
               {filterOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
@@ -492,7 +492,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
             <select 
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-red-500"
+              className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -525,7 +525,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
             <button 
               onClick={exportPDF}
               disabled={groupedRows.length === 0}
-              className="w-12 h-12 flex items-center justify-center bg-red-600 rounded-xl text-white shadow-sm disabled:opacity-50"
+              className="w-12 h-12 flex items-center justify-center bg-uster-red rounded-xl text-white shadow-sm disabled:opacity-50"
               title="Export PDF"
             >
               <FileText size={20} />
@@ -552,7 +552,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl"
             >
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-red-600">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-uster-red">
                 <h3 className="text-white font-black uppercase text-sm">Visible Columns</h3>
                 <button onClick={() => setShowColumnConfig(false)} className="text-white/80 hover:text-white">
                   <X size={20} />
@@ -571,7 +571,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
                     }}
                     className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
                       visibleColumns.includes(col.title)
-                        ? 'bg-red-50 border-red-200 text-red-600'
+                        ? 'bg-red-50 border-red-200 text-uster-red'
                         : 'bg-gray-50 border-gray-100 text-gray-400'
                     }`}
                   >
@@ -583,7 +583,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
               <div className="p-6 bg-gray-50">
                 <button 
                   onClick={() => setShowColumnConfig(false)}
-                  className="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg shadow-red-200"
+                  className="w-full bg-uster-red text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg shadow-red-200"
                 >
                   Done
                 </button>
@@ -598,12 +598,12 @@ const SearchTab: React.FC<SearchTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-red-600">
-                <th className="p-3 text-[10px] font-black text-white uppercase tracking-wider sticky left-0 bg-red-600 z-10 border-b border-red-700">
+              <tr className="bg-uster-red">
+                <th className="p-3 text-[10px] font-black text-white uppercase tracking-wider sticky left-0 bg-uster-red z-10 border-b border-uster-red-dark">
                   {groupByOptions.find(o => o.id === groupBy)?.label}
                 </th>
                 {REPORT_COLUMNS.filter(c => visibleColumns.includes(c.title)).map(col => (
-                  <th key={col.title} className="p-3 text-[10px] font-black text-white uppercase tracking-wider text-center border-b border-red-700">
+                  <th key={col.title} className="p-3 text-[10px] font-black text-white uppercase tracking-wider text-center border-b border-uster-red-dark">
                     {col.title}
                   </th>
                 ))}

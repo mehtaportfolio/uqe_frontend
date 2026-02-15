@@ -36,7 +36,7 @@ const QualityView: React.FC<QualityViewProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E30613] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#C8102E] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -56,7 +56,7 @@ const QualityView: React.FC<QualityViewProps> = ({
         {data.map((unitData) => (
           <div key={unitData.unit} className="mb-8 last:mb-0">
             <div className="bg-red-50 px-6 py-3 border-y border-red-100">
-              <h4 className="font-black text-red-600 uppercase tracking-widest text-xs">
+              <h4 className="font-black text-uster-red uppercase tracking-widest text-xs">
                 {unitData.unit} - {unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}
               </h4>
             </div>
@@ -100,7 +100,7 @@ const QualityView: React.FC<QualityViewProps> = ({
                             >
                               <td className="px-4 py-4 text-xs font-bold text-gray-800 flex items-center space-x-2">
                                 <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] ? 'rotate-90' : ''}`}>
-                                  <ChevronRight size={14} className="text-red-600" />
+                                  <ChevronRight size={14} className="text-uster-red" />
                                 </div>
                                 <span>{viewMode === 'article' ? row.articleNumber : row.displayMachineName}</span>
                               </td>
@@ -120,7 +120,7 @@ const QualityView: React.FC<QualityViewProps> = ({
                                   exit={{ opacity: 0, height: 0 }}
                                 >
                                   <td colSpan={10} className="px-0 py-0 bg-gray-50/30">
-                                    <div className="overflow-hidden border-l-4 border-red-600/20">
+                                    <div className="overflow-hidden border-l-4 border-uster-red/20">
                                       <table className="w-full">
                                         <tbody className="divide-y divide-gray-100">
                                           {[...(viewMode === 'article' ? row.machines : row.articles)].sort((a, b) => {
@@ -150,14 +150,14 @@ const QualityView: React.FC<QualityViewProps> = ({
                         ))}
                         {/* Overall Average Row */}
                         <tr className="bg-red-50 font-black">
-                          <td className="px-4 py-4 text-xs text-red-600">Overall Average</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatOneDecimal(unitData.unitQuality?.CVAvg)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatRound(unitData.unitQuality?.Thin50)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatRound(unitData.unitQuality?.Thick50)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatRound(unitData.unitQuality?.Nep200)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatRound(unitData.unitQuality?.IPI)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatRound(unitData.unitQuality?.HSIPI)}</td>
-                          <td className="px-4 py-4 text-xs text-red-600 text-center">{formatOneDecimal(unitData.unitQuality?.HAvg)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red">Overall Average</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatOneDecimal(unitData.unitQuality?.CVAvg)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatRound(unitData.unitQuality?.Thin50)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatRound(unitData.unitQuality?.Thick50)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatRound(unitData.unitQuality?.Nep200)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatRound(unitData.unitQuality?.IPI)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatRound(unitData.unitQuality?.HSIPI)}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red text-center">{formatOneDecimal(unitData.unitQuality?.HAvg)}</td>
                         </tr>
                       </>
                     );

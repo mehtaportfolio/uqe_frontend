@@ -24,7 +24,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E30613] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#C8102E] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -44,11 +44,11 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
         {data.map((unitData) => (
           <div key={unitData.unit} className="mb-8 last:mb-0">
             <div className="bg-red-50 px-6 py-3 border-y border-red-100 flex justify-between items-center">
-              <h4 className="font-black text-red-600 uppercase tracking-widest text-xs">
+              <h4 className="font-black text-uster-red uppercase tracking-widest text-xs">
                 {unitData.unit} - {unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}
               </h4>
               <div className="text-right">
-                <span className="text-xs font-black text-red-600">{unitData.totalAlarms || 0} Total</span>
+                <span className="text-xs font-black text-uster-red">{unitData.totalAlarms || 0} Total</span>
               </div>
             </div>
             
@@ -68,7 +68,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                     <th className="px-2 py-3 text-[9px] font-black uppercase tracking-wider text-gray-400 text-center">CV</th>
                     <th className="px-2 py-3 text-[9px] font-black uppercase tracking-wider text-gray-400 text-center">HA</th>
                     <th className="px-2 py-3 text-[9px] font-black uppercase tracking-wider text-gray-400 text-center">CMT</th>
-                    <th className="px-2 py-3 text-[9px] font-black uppercase tracking-wider text-red-600 text-center">Total</th>
+                    <th className="px-2 py-3 text-[9px] font-black uppercase tracking-wider text-uster-red text-center">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -97,7 +97,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                             >
                               <td className="px-4 py-4 text-xs font-bold text-gray-800 flex items-center space-x-2">
                                 <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] ? 'rotate-90' : ''}`}>
-                                  <ChevronRight size={14} className="text-red-600" />
+                                  <ChevronRight size={14} className="text-uster-red" />
                                 </div>
                                 <span>{viewMode === 'article' ? row.articleNumber : row.displayMachineName}</span>
                               </td>
@@ -112,7 +112,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                               <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CVpABlks || 0}</td>
                               <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.HpABlks || 0}</td>
                               <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CMTABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-red-600 text-center bg-red-50/30">{row.totalAlarms || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-uster-red text-center bg-red-50/30">{row.totalAlarms || 0}</td>
                             </tr>
                             <AnimatePresence>
                               {expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] && (viewMode === 'article' ? row.machines : row.articles) && (
@@ -122,7 +122,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                                   exit={{ opacity: 0, height: 0 }}
                                 >
                                   <td colSpan={13} className="px-0 py-0 bg-gray-50/30">
-                                    <div className="overflow-hidden border-l-4 border-red-600/20">
+                                    <div className="overflow-hidden border-l-4 border-uster-red/20">
                                       <table className="w-full">
                                         <tbody className="divide-y divide-gray-100">
                                           {[...(viewMode === 'article' ? row.machines : row.articles)].sort((a, b) => {
@@ -143,7 +143,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                                               <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CVpABlks || 0}</td>
                                               <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.HpABlks || 0}</td>
                                               <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CMTABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-black text-red-600/60 text-center bg-red-50/10">{sub.totalAlarms || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-black text-uster-red/60 text-center bg-red-50/10">{sub.totalAlarms || 0}</td>
                                             </tr>
                                           ))}
                                         </tbody>
@@ -157,19 +157,19 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                         ))}
                         {/* Overall Total Row */}
                         <tr className="bg-red-50 font-black">
-                          <td className="px-4 py-4 text-xs text-red-600">Overall Total</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.NSABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.LABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.TABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.CABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.CCABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.FABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.PPABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.PFABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.CVpABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.HpABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center">{unitData.alarmBreakdown?.CMTABlks || 0}</td>
-                          <td className="px-2 py-4 text-xs text-red-600 text-center bg-red-100/50">{unitData.totalAlarms || 0}</td>
+                          <td className="px-4 py-4 text-xs text-uster-red">Overall Total</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.NSABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.LABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.TABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.CABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.CCABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.FABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.PPABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.PFABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.CVpABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.HpABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center">{unitData.alarmBreakdown?.CMTABlks || 0}</td>
+                          <td className="px-2 py-4 text-xs text-uster-red text-center bg-red-100/50">{unitData.totalAlarms || 0}</td>
                         </tr>
                       </>
                     );

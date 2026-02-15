@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-uster-red: #C8102E;
+  --color-uster-red-dark: #A50D26;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

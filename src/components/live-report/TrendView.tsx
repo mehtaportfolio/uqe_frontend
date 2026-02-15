@@ -31,7 +31,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
   if (loading) {
     return (
       <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4 min-h-[400px]">
-        <Loader2 size={32} className="text-red-600 animate-spin" />
+        <Loader2 size={32} className="text-uster-red animate-spin" />
         <p className="text-sm text-gray-500 font-bold">Fetching trend data...</p>
       </div>
     );
@@ -41,7 +41,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
     return (
       <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4 min-h-[400px]">
         <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
-          <TrendingUp size={32} className="text-red-600" />
+          <TrendingUp size={32} className="text-uster-red" />
         </div>
         <div className="text-center">
           <h3 className="text-lg font-black uppercase tracking-tight text-gray-800">Quality Trends</h3>
@@ -55,7 +55,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
     return (
       <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4 min-h-[400px]">
         <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
-          <TrendingUp size={32} className="text-red-600" />
+          <TrendingUp size={32} className="text-uster-red" />
         </div>
         <div className="text-center">
           <h3 className="text-lg font-black uppercase tracking-tight text-gray-800">No Data Found</h3>
@@ -109,7 +109,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
           <td className={`px-4 py-3 text-xs font-bold text-gray-700 border-b border-r border-gray-100 sticky left-0 z-10 whitespace-nowrap ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${isSubRow ? 'pl-8 text-gray-500 italic' : ''}`}>
             <div className="flex items-center space-x-2">
               {!isSubRow && hasDrillDown && (
-                expandedRows[label] ? <ChevronDown size={14} className="text-red-600" /> : <ChevronRight size={14} className="text-gray-400" />
+                expandedRows[label] ? <ChevronDown size={14} className="text-uster-red" /> : <ChevronRight size={14} className="text-gray-400" />
               )}
               <span>{label}</span>
             </div>
@@ -124,7 +124,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
             );
           })}
           <td className={`px-4 py-3 text-xs font-black border-b border-gray-100 text-center ${
-            diffPercent.includes('+') ? 'text-red-600' : diffPercent.includes('-') ? 'text-green-600' : 'text-gray-600'
+            diffPercent.includes('+') ? 'text-uster-red' : diffPercent.includes('-') ? 'text-green-600' : 'text-gray-600'
           }`}>
             {diffPercent}
           </td>
@@ -138,7 +138,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="bg-red-600 px-6 py-4">
+      <div className="bg-uster-red px-6 py-4">
         <h3 className="text-white font-black uppercase tracking-widest text-sm">
           {parameter} Trend Report
         </h3>
@@ -148,15 +148,15 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="bg-red-50 text-red-600 px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-r border-red-100 text-left sticky left-0 z-10">
+              <th className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-r border-red-100 text-left sticky left-0 z-10">
                 Trend
               </th>
               {dates.map(date => (
-                <th key={date} className="bg-red-50 text-red-600 px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
+                <th key={date} className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
                   {formatDate(date)}
                 </th>
               ))}
-              <th className="bg-red-50 text-red-600 px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
+              <th className="bg-red-50 text-uster-red px-4 py-3 text-xs font-black uppercase tracking-wider border-b border-red-100 text-center whitespace-nowrap">
                 % Diff
               </th>
             </tr>
