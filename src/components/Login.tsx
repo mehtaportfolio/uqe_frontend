@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, AlertCircle, Fingerprint } from 'lucide-react';
+import { Lock, AlertCircle, Fingerprint } from 'lucide-react';
 import { getBiometricEnabled, getStoredPassword, authenticateWithBiometrics } from '../utils/bioAuth';
 
 interface LoginProps {
