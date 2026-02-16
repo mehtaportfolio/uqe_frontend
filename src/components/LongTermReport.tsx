@@ -17,8 +17,8 @@ const API_BASE = import.meta.env.VITE_API_URL;
 
 const PARAMETER_SHORT_NAMES: Record<string, string> = {
   YarnFaults: 'YF', NCuts: 'N', SCuts: 'S', LCuts: 'L', TCuts: 'T', FDCuts: 'FD', PPCuts: 'PP',
-  CpCuts: 'Cp', CmCuts: 'Cm', CCpCuts: 'CCp', CCmCuts: 'CCm', JpCuts: 'Jp', JmCuts: 'Jm', PFCuts: 'PF',
-  YarnJoints: 'YJ', YarnBreaks: 'YB', B_A1Events: 'A1', B_A2Events: 'A2', B_B1Events: 'B1', B_B2Events: 'B2',
+  CpCuts: 'Cp', CmCuts: 'Cm', CCpCuts: 'CCp', CCmCuts: 'CCm',
+  B_A1Events: 'A1', B_A2Events: 'A2', B_B1Events: 'B1', B_B2Events: 'B2',
   CVAvg: 'CV%', HAvg: 'H', NSABlks: 'NS', LABlks: 'LA', TABlks: 'TA', CABlks: 'CA', CCABlks: 'CCA',
   FABlks: 'FA', PPABlks: 'PPA', PFABlks: 'PFA', CVpABlks: 'CVpA', HpABlks: 'HpA', CMTABlks: 'CMTA',
   YABlks: 'YA', IPI: 'IPI', HSIPI: 'HS IPI'
@@ -43,7 +43,8 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
     startDate: '',
     endDate: '',
     lotId: '',
-    articles: ''
+    articles: '',
+    unit: ''
   });
 
   const downloadPDF = async () => {
@@ -185,6 +186,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
       if (currentFilters.endDate) params.append('endDate', currentFilters.endDate);
       if (currentFilters.lotId) params.append('lotId', currentFilters.lotId);
       if (currentFilters.articles) params.append('articles', currentFilters.articles);
+      if (currentFilters.unit) params.append('unit', currentFilters.unit);
 
       const response = await fetch(`${API_BASE}/long-term/data?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch data');
@@ -198,8 +200,8 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
     }
   }, []);
 
-  const handleLoadData = (startDate: string, endDate: string) => {
-    const newFilters = { ...filters, startDate, endDate };
+  const handleLoadData = (startDate: string, endDate: string, unit?: string) => {
+    const newFilters = { ...filters, startDate, endDate, unit: unit || '' };
     setFilters(newFilters);
     fetchData(newFilters);
   };

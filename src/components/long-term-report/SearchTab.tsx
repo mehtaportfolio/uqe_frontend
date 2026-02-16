@@ -98,7 +98,7 @@ const SearchableMultiSelect: React.FC<{
 
 interface SearchTabProps {
   data: LongTermDataRecord[];
-  onLoadData: (startDate: string, endDate: string) => void;
+  onLoadData: (startDate: string, endDate: string, unit?: string) => void;
   onSearchLot: (lotIds: string) => void;
   onSearchArticle: (articles: string) => void;
   onReset: () => void;
@@ -122,6 +122,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
   const [articleSuggestions, setArticleSuggestions] = useState<string[]>([]);
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState('');
   const [groupBy, setGroupBy] = useState('MillUnit');
   const [reportType, setReportType] = useState('daily');
   const [filterField, setFilterField] = useState('');
@@ -136,6 +137,7 @@ const SearchTab: React.FC<SearchTabProps> = ({
     setArticleInput('');
     setArticleSuggestions([]);
     setSelectedArticles([]);
+    setSelectedUnit('');
     setGroupBy('MillUnit');
     setReportType('daily');
     setFilterField('');
@@ -368,10 +370,24 @@ const SearchTab: React.FC<SearchTabProps> = ({
             />
           </div>
         </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Mill Unit (Recommended for performance)</label>
+          <select 
+            value={selectedUnit} 
+            onChange={(e) => setSelectedUnit(e.target.value)}
+            className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-uster-red appearance-none"
+          >
+            <option value="">All Units (Slower)</option>
+            {['U-1', 'U-2', 'U-3', 'U-4', 'U-5', 'U-6'].map(u => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+        </div>
         
         <div className="flex gap-2">
           <button 
-            onClick={() => onLoadData(startDate, endDate)}
+            onClick={() => onLoadData(startDate, endDate, selectedUnit)}
             disabled={loading || !startDate || !endDate}
             className="flex-1 bg-uster-red text-white py-3 rounded-xl font-bold text-sm shadow-md shadow-red-200 active:scale-95 transition-transform disabled:opacity-50"
           >

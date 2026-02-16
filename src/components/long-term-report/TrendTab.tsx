@@ -7,7 +7,7 @@ import TrendView from '../live-report/TrendView';
 
 interface TrendTabProps {
   data: LongTermDataRecord[];
-  onLoadData: (startDate: string, endDate: string) => void;
+  onLoadData: (startDate: string, endDate: string, unit?: string) => void;
   loading: boolean;
   onTrendResponseChange?: (response: TrendResponse | null) => void;
   onParameterChange?: (parameter: string) => void;
@@ -30,16 +30,15 @@ const TREND_GROUPS = [
 ];
 
 const GROUP_PARAMETERS: Record<string, string[]> = {
-  quality: ['Nep140', 'Nep200', 'Nep280', 'Nep400', 'Thick35', 'Thick50', 'Thick70', 'Thick100', 'Thin40', 'Thin30', 'Thin50', 'Thin60', 'CVAvg', 'HAvg', 'IPI', 'HSIPI'],
-  cuts: ['YarnFaults', 'YarnJoints', 'YarnBreaks', 'NCuts', 'SCuts', 'LCuts', 'TCuts', 'FDCuts', 'PPCuts', 'CpCuts', 'CmCuts', 'CCpCuts', 'CCmCuts', 'JpCuts', 'JmCuts', 'PFCuts'],
+  quality: ['Nep140', 'Nep200', 'Thick35', 'Thick50', 'Thin40', 'Thin50', 'CVAvg', 'HAvg', 'IPI', 'HSIPI'],
+  cuts: ['YarnFaults', 'NCuts', 'SCuts', 'LCuts', 'TCuts', 'FDCuts', 'PPCuts', 'CpCuts', 'CmCuts', 'CCpCuts', 'CCmCuts'],
   alarms: ['totalAlarms', 'NSABlks', 'LABlks', 'TABlks', 'CABlks', 'CCABlks', 'FABlks', 'PPABlks', 'PFABlks', 'CVpABlks', 'HpABlks', 'CMTABlks'],
   cmt: ['B_A1Events', 'B_A2Events', 'B_B1Events', 'B_B2Events'],
 };
 
 const PARAMETER_SHORT_NAMES: Record<string, string> = {
   YarnFaults: 'YF', NCuts: 'N', SCuts: 'S', LCuts: 'L', TCuts: 'T', FDCuts: 'FD', PPCuts: 'PP',
-  CpCuts: 'Cp', CmCuts: 'Cm', CCpCuts: 'CCp', CCmCuts: 'CCm', JpCuts: 'Jp', JmCuts: 'Jm', PFCuts: 'PF',
-  YarnJoints: 'YJ', YarnBreaks: 'YB', B_A1Events: 'A1', B_A2Events: 'A2', B_B1Events: 'B1', B_B2Events: 'B2',
+  CpCuts: 'Cp', CmCuts: 'Cm', CCpCuts: 'CCp', CCmCuts: 'CCm',
   CVAvg: 'CV%', HAvg: 'H', NSABlks: 'NS', LABlks: 'LA', TABlks: 'TA', CABlks: 'CA', CCABlks: 'CC',
   FABlks: 'FA', PPABlks: 'PP', PFABlks: 'PF', CVpABlks: 'CV', HpABlks: 'HA', CMTABlks: 'CMT',
   IPI: 'IPI', HSIPI: 'HS IPI', totalAlarms: 'Total Alarms'
@@ -184,7 +183,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
 
   const handleShowData = async () => {
     if (startDate && endDate) {
-      onLoadData(startDate, endDate);
+      onLoadData(startDate, endDate, selectedUnit);
     }
     
     setTrendLoading(true);
