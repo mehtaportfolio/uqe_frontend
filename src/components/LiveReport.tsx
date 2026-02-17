@@ -166,11 +166,12 @@ const SearchableMultiSelect: React.FC<{
 interface LiveReportProps {
   onBack: () => void;
   initialTab?: 'dashboard' | 'online';
+  initialData?: LiveReportData[];
 }
 
-const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard' }) => {
-  const [data, setData] = useState<LiveReportData[]>([]);
-  const [loading, setLoading] = useState(true);
+const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard', initialData = [] }) => {
+  const [data, setData] = useState<LiveReportData[]>(initialData);
+  const [loading, setLoading] = useState(initialData.length === 0);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'quality' | 'cuts' | 'alarms' | 'trend'>('dashboard');
   const [mainTab, setMainTab] = useState<'dashboard' | 'online'>(initialTab);
@@ -327,7 +328,9 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
 
   useEffect(() => {
     if (activeTab !== 'trend') {
-      setLoading(true);
+      if (data.length === 0) {
+        setLoading(true);
+      }
       fetchData();
       
       if (!selectedDate && !selectedShift && !selectedUnit && !selectedMachine) {
@@ -422,7 +425,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
       if (activeTab === 'dashboard') {
         if (!reportRef.current) return;
         const canvas = await html2canvas(reportRef.current, {
-          scale: 3,
+          scale: 2,
           useCORS: true,
           backgroundColor: '#F5F5F5',
           onclone: (clonedDoc) => {
@@ -437,28 +440,28 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                 if (links[i].rel === 'stylesheet') links[i].remove();
               }
 
-              // 2. Inject a simple baseline CSS for the report components
+              // 2. Inject a simple baseline CSS for the report components with better sized cards
               const style = clonedDoc.createElement('style');
               style.innerHTML = `
                 * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
                 body { font-family: sans-serif; background: #F5F5F5; }
                 .grid { display: grid; }
                 .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-                .gap-4 { gap: 1rem; }
+                .gap-4 { gap: 1.5rem; }
                 .bg-white { background-color: #ffffff; }
                 .bg-\\[\\#ffffff\\] { background-color: #ffffff; }
-                .p-6 { padding: 1.5rem; }
-                .rounded-3xl { border-radius: 1.5rem; }
+                .p-6 { padding: 2rem !important; }
+                .rounded-3xl { border-radius: 2rem; }
                 .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-                .border-b-4 { border-bottom-width: 4px; }
-                .border-\\[\\#E30613\\] { border-color: #E30613; }
-                .text-\\[\\#E30613\\] { color: #E30613; }
+                .border-b-4 { border-bottom: 6px solid #C8102E !important; }
+                .border-\\[\\#C8102E\\] { border-color: #C8102E; }
+                .text-\\[\\#C8102E\\] { color: #C8102E; }
                 .text-\\[\\#1f2937\\] { color: #1f2937; }
                 .text-\\[\\#6b7280\\] { color: #6b7280; }
-                .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-                .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-                .text-\\[11px\\] { font-size: 11px; }
-                .text-\\[10px\\] { font-size: 10px; }
+                .text-xl { font-size: 2rem !important; line-height: 2.5rem; }
+                .text-sm { font-size: 1.25rem !important; line-height: 1.5rem; }
+                .text-\\[11px\\] { font-size: 15px !important; }
+                .text-\\[10px\\] { font-size: 1.25rem !important; line-height: 1.5rem; }
                 .font-black { font-weight: 900; }
                 .font-bold { font-weight: 700; }
                 .uppercase { text-transform: uppercase; }
@@ -470,13 +473,18 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
                 .relative { position: relative; }
                 .overflow-hidden { overflow: hidden; }
                 .absolute { position: absolute; }
-                .top-2 { top: 0.5rem; }
-                .right-2 { right: 0.5rem; }
+                .top-2 { top: 1rem !important; }
+                .right-2 { right: 1rem !important; }
                 .opacity-10 { opacity: 0.1; }
-                .mb-1 { margin-bottom: 0.25rem; }
-                .mt-1 { margin-top: 0.25rem; }
+                .mb-1 { margin-bottom: 0.5rem !important; }
+                .mt-1 { margin-top: 0.5rem !important; }
                 .text-center { text-align: center; }
-                .leading-tight { line-height: 1.25; }
+                .leading-tight { line-height: 1.2; }
+                
+                /* Limit to 6 cards for PDF */
+                .grid > div:nth-child(n+7) {
+                  display: none !important;
+                }
               `;
               clonedDoc.head.appendChild(style);
 
@@ -502,11 +510,11 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           }
         });
         
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
         const startY = addHeader(pdf, `Uster Quantum Expert - Live Dashboard`);
         const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 10, startY, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', 10, startY, pdfWidth, pdfHeight);
       } else if (activeTab === 'quality') {
         let currentY = addHeader(pdf, `Uster Quantum Expert - Quality Report`);
         

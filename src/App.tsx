@@ -31,6 +31,7 @@ interface UnitData {
   unitCuts?: UnitCuts;
   shiftNumber?: string;
   latestShift?: string;
+  shiftStartTime?: string;
 }
 
 const App: React.FC = () => {
@@ -40,6 +41,15 @@ const App: React.FC = () => {
   const [unitsData, setUnitsData] = useState<UnitData[]>([]);
   const [currentUnitIndex, setCurrentUnitIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [toasts, setToasts] = useState<{ id: number; message: string }[]>([]);
+
+  const showToast = (message: string) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
 
   // PWA Auto Update logic
   useRegisterSW({
@@ -62,16 +72,35 @@ const App: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     if (!isAuthenticated) return;
-    try {
-      const response = await fetch(`${API_BASE}/quantum/live`);
-      const result = await response.json();
-      setUnitsData(result);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching live data:", error);
-      setLoading(false);
+    
+    const units = ['U-1', 'U-2', 'U-3', 'U-4', 'U-5', 'U-6'];
+    
+    // We'll fetch units one by one
+    for (const unit of units) {
+      try {
+        const response = await fetch(`${API_BASE}/quantum/live?unit=${unit}`);
+        const result = await response.json();
+        
+        if (result && result.length > 0) {
+          const unitData = result[0];
+          setUnitsData(prev => {
+            // Check if we already have this unit to update or append
+            const index = prev.findIndex(u => u.unit === unitData.unit);
+            if (index !== -1) {
+              const newData = [...prev];
+              newData[index] = unitData;
+              return newData;
+            }
+            return [...prev, unitData];
+          });
+          setLoading(false);
+          showToast(`${unit} Data loaded`);
+        }
+      } catch (error) {
+        console.error(`Error fetching live data for ${unit}:`, error);
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, API_BASE]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -106,6 +135,14 @@ const App: React.FC = () => {
     return isNaN(num) ? '0.0' : num.toFixed(1);
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    const [year, month, day] = parts;
+    return `${day}-${month}-${year.slice(-2)}`;
+  };
+
   const stats = [
     { label: 'YF', value: formatOneDecimal(unitCuts.YarnFaults || 0) },
     { label: 'N', value: formatOneDecimal(unitCuts.NCuts || 0) },
@@ -117,10 +154,10 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (activeTab === 'dashboard') {
-      return <LiveReport onBack={() => setActiveTab('home')} initialTab="dashboard" />;
+      return <LiveReport onBack={() => setActiveTab('home')} initialTab="dashboard" initialData={unitsData as any} />;
     }
     if (activeTab === 'online') {
-      return <LiveReport onBack={() => setActiveTab('home')} initialTab="online" />;
+      return <LiveReport onBack={() => setActiveTab('home')} initialTab="online" initialData={unitsData as any} />;
     }
     if (activeTab === 'longterm') {
       return <LongTermReport onBack={() => setActiveTab('home')} />;
@@ -169,11 +206,18 @@ const App: React.FC = () => {
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Active Unit</p>
               <h2 className="text-2xl font-black text-gray-800">{currentUnitData.unit || 'Loading...'}</h2>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 ${loading ? 'bg-amber-400' : 'bg-green-400'} rounded-full animate-pulse`}></span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase">
-                {loading ? 'Loading Data...' : `Live Data ${currentUnitData.latestShift && currentUnitData.latestShift !== 'All' ? `(${currentUnitData.latestShift})` : ''}`}
-              </span>
+            <div className="flex flex-col items-end">
+              <div className="flex items-center space-x-2">
+                <span className={`w-2 h-2 ${loading ? 'bg-amber-400' : 'bg-green-400'} rounded-full animate-pulse`}></span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase">
+                  {loading ? 'Loading Data...' : `Live Data ${currentUnitData.latestShift && currentUnitData.latestShift !== 'All' ? `(${currentUnitData.latestShift})` : ''}`}
+                </span>
+              </div>
+              {!loading && currentUnitData.shiftStartTime && (
+                <span className="text-[10px] font-bold text-gray-400">
+                  {formatDate(currentUnitData.shiftStartTime)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -237,8 +281,26 @@ const App: React.FC = () => {
           </button>
         ))}
       </nav>
+
+      {/* Toast Notifications */}
+      <div className="fixed top-20 right-4 z-[200] flex flex-col gap-2">
+        <AnimatePresence>
+          {toasts.map(toast => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-xs font-bold border-l-4 border-uster-red flex items-center space-x-2"
+            >
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>{toast.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
