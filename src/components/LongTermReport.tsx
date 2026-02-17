@@ -7,7 +7,7 @@ import SearchTab from './long-term-report/SearchTab';
 import TrendTab from './long-term-report/TrendTab';
 import RestartButton from './RestartButton';
 import type { LongTermDataRecord } from './long-term-report/types';
-import type { TrendResponse } from './live-report/types';
+import type { TrendResponse, TrendDataPoint } from './live-report/types';
 
 interface LongTermReportProps {
   onBack: () => void;
@@ -111,7 +111,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           try {
             const [year, month, day] = d.split('-');
             return `${day}-${month}-${year.slice(-2)}`;
-          } catch (e) {
+          } catch {
             return d;
           }
         });
@@ -122,14 +122,14 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
         const body = trendResponse.labels.map((label: string) => {
           const rowData: (string | number)[] = [label];
           dates.forEach((date: string) => {
-            const dayData = trendResponse.data.find((d: any) => d.date === date);
+            const dayData = trendResponse.data.find((d: TrendDataPoint) => d.date === date);
             rowData.push(dayData ? dayData[label] : '-');
           });
 
           // Find the oldest available data point for this row
-          let oldestVal: any = undefined;
+          let oldestVal: string | number | undefined = undefined;
           for (const date of dates) {
-            const val = trendResponse.data.find((d: any) => d.date === date)?.[label];
+            const val = trendResponse.data.find((d: TrendDataPoint) => d.date === date)?.[label];
             if (val !== undefined && val !== null) {
               oldestVal = val;
               break;
@@ -137,7 +137,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
           }
           
           const latestDate = dates[dates.length - 1];
-          const latestVal = latestDate ? trendResponse.data.find((d: any) => d.date === latestDate)?.[label] : undefined;
+          const latestVal = latestDate ? trendResponse.data.find((d: TrendDataPoint) => d.date === latestDate)?.[label] : undefined;
           
           let diffPercent = '-';
           if (oldestVal !== undefined && latestVal !== undefined) {
@@ -166,7 +166,7 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
         });
       }
 
-      const anyWindow = window as any;
+      const anyWindow = (window as unknown) as any;
       if (anyWindow.Android && anyWindow.Android.savePDF) {
         const pdfDataUri = pdf.output('datauristring');
         anyWindow.Android.savePDF(pdfDataUri);
@@ -234,7 +234,8 @@ const LongTermReport: React.FC<LongTermReportProps> = ({ onBack }) => {
       startDate: '',
       endDate: '',
       lotId: '',
-      articles: ''
+      articles: '',
+      unit: ''
     });
     setData([]);
   };

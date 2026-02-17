@@ -23,7 +23,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
     try {
       const [year, month, day] = dateStr.split('-');
       return `${day}-${month}-${year.slice(-2)}`;
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };
@@ -85,7 +85,7 @@ const TrendView: React.FC<TrendViewProps> = ({ response, loading, parameter, hid
     const dataSet = isSubRow && parentLabel && response.drillDownData ? response.drillDownData[parentLabel].data : response.data;
     
     // Find the oldest available data point for this row
-    let oldestVal: any = undefined;
+    let oldestVal: string | number | undefined = undefined;
     for (const key of allKeys) {
       const val = dataSet.find(d => d.date === key)?.[label];
       if (val !== undefined && val !== null) {

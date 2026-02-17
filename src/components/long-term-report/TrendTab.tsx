@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Activity, Layers, Settings, Search, X, Check, Eye, EyeOff, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { type LongTermDataRecord } from './types';
-import { type TrendResponse } from '../live-report/types';
+import { type TrendResponse, type TrendDataPoint } from '../live-report/types';
 import TrendView from '../live-report/TrendView';
 
 interface TrendTabProps {
@@ -197,7 +197,18 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
 
   const calculateTrend = () => {
     try {
-      const trendMap: Record<string, Record<string, any>> = {};
+      const trendMap: Record<string, Record<string, {
+        sum: number;
+        refLength: number;
+        yarnLength: number;
+        count: number;
+        machines: Record<string, {
+          sum: number;
+          refLength: number;
+          yarnLength: number;
+          count: number;
+        }>;
+      }>> = {};
       const labelsSet = new Set<string>();
       const datesSet = new Set<string>();
       const labelMachineMap: Record<string, Set<string>> = {};
@@ -263,7 +274,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
 
       const sortedDates = Array.from(datesSet).sort();
       
-      const calculateFinal = (s: any) => {
+      const calculateFinal = (s: { sum: number; refLength: number; yarnLength: number; count: number }) => {
         if (selectedTrendGroup === 'quality') {
           if (selectedParameter === 'CVAvg' || selectedParameter === 'HAvg') {
             return s.count > 0 ? (s.sum / s.count).toFixed(2) : "0.00";
@@ -278,7 +289,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
       };
 
       const result = sortedDates.map(date => {
-        const row: any = { date };
+        const row: TrendDataPoint = { date };
         Object.keys(trendMap[date]).forEach(label => {
           row[label] = calculateFinal(trendMap[date][label]);
           if (!labelMachineMap[label]) labelMachineMap[label] = new Set();
@@ -287,13 +298,13 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
         return row;
       });
 
-      const drillDownData: any = {};
+      const drillDownData: Record<string, { labels: string[]; data: TrendDataPoint[] }> = {};
       Object.keys(labelMachineMap).forEach(label => {
         const machines = Array.from(labelMachineMap[label]).sort();
         drillDownData[label] = {
           labels: machines,
           data: sortedDates.map(date => {
-            const dRow: any = { date };
+            const dRow: TrendDataPoint = { date };
             machines.forEach(m => {
               if (trendMap[date] && trendMap[date][label] && trendMap[date][label].machines[m]) {
                 dRow[m] = calculateFinal(trendMap[date][label].machines[m]);

@@ -80,28 +80,28 @@ const CutsView: React.FC<CutsViewProps> = ({
 
                     return (
                       <>
-                        {rows.map((row: any, artIdx: number) => (
+                        {rows.map((row: unknown, artIdx: number) => (
                           <React.Fragment key={artIdx}>
                             <tr 
-                              onClick={() => toggleArticleExpansion(unitData.unit, viewMode === 'article' ? row.articleNumber : row.machineName)}
+                              onClick={() => toggleArticleExpansion(unitData.unit, viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName)}
                               className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                             >
                               <td className="px-4 py-4 text-xs font-bold text-gray-800 flex items-center space-x-2">
-                                <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] ? 'rotate-90' : ''}`}>
+                                <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName}`] ? 'rotate-90' : ''}`}>
                                   <ChevronRight size={14} className="text-uster-red" />
                                 </div>
-                                <span>{viewMode === 'article' ? row.articleNumber : row.displayMachineName}</span>
+                                <span>{viewMode === 'article' ? (row as any).articleNumber : (row as any).displayMachineName}</span>
                               </td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.YarnFaults))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.NCuts))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.SCuts))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.LCuts))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.TCuts))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.FDCuts))}</td>
-                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number(row.PPCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).YarnFaults))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).NCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).SCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).LCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).TCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).FDCuts))}</td>
+                              <td className="px-4 py-4 text-xs font-black text-gray-900 text-center">{Math.round(Number((row as any).PPCuts))}</td>
                             </tr>
                             <AnimatePresence>
-                              {expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] && (viewMode === 'article' ? row.machines : row.articles) && (
+                              {expandedArticles[`${unitData.unit}-${viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName}`] && (viewMode === 'article' ? (row as any).machines : (row as any).articles) && (
                                 <motion.tr
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: 'auto' }}
@@ -111,20 +111,20 @@ const CutsView: React.FC<CutsViewProps> = ({
                                     <div className="overflow-hidden border-l-4 border-uster-red/20">
                                       <table className="w-full">
                                         <tbody className="divide-y divide-gray-100">
-                                          {[...(viewMode === 'article' ? row.machines : row.articles)].sort((a, b) => {
+                                          {[...(viewMode === 'article' ? (row as any).machines : (row as any).articles)].sort((a, b) => {
                                             const valA = viewMode === 'article' ? a.machineName : a.articleNumber;
                                             const valB = viewMode === 'article' ? b.machineName : b.articleNumber;
                                             return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
-                                          }).map((sub: any, subIdx: number) => (
+                                          }).map((sub: unknown, subIdx: number) => (
                                             <tr key={subIdx} className="bg-white/50">
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-500 pl-10 italic">{viewMode === 'article' ? sub.machineName.slice(-2) : sub.articleNumber}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.YarnFaults))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.NCuts))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.SCuts))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.LCuts))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.TCuts))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.FDCuts))}</td>
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number(sub.PPCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-500 pl-10 italic">{viewMode === 'article' ? (sub as any).machineName.slice(-2) : (sub as any).articleNumber}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).YarnFaults))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).NCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).SCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).LCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).TCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).FDCuts))}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-600 text-center">{Math.round(Number((sub as any).PPCuts))}</td>
                                             </tr>
                                           ))}
                                         </tbody>

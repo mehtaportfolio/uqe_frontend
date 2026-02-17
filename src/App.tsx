@@ -14,6 +14,7 @@ import LongTermReport from './components/LongTermReport';
 import Login from './components/Login';
 import SettingsView from './components/Settings';
 import RestartButton from './components/RestartButton';
+import { type LiveReportData } from './components/live-report/types';
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -29,7 +30,7 @@ interface UnitCuts {
 interface UnitData {
   unit?: string;
   unitCuts?: UnitCuts;
-  shiftNumber?: string;
+  shiftNumber?: string | number;
   latestShift?: string;
   shiftStartTime?: string;
 }
@@ -38,7 +39,7 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userPassword, setUserPassword] = useState<string>('');
   const [activeTab, setActiveTab] = useState('home');
-  const [unitsData, setUnitsData] = useState<UnitData[]>([]);
+  const [unitsData, setUnitsData] = useState<LiveReportData[]>([]);
   const [currentUnitIndex, setCurrentUnitIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<{ id: number; message: string }[]>([]);
@@ -100,13 +101,18 @@ const App: React.FC = () => {
         console.error(`Error fetching live data for ${unit}:`, error);
       }
     }
-  }, [isAuthenticated, API_BASE]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      void fetchData();
+      const initialFetch = setTimeout(() => {
+        void fetchData();
+      }, 0);
       const dataInterval = setInterval(fetchData, 30000);
-      return () => clearInterval(dataInterval);
+      return () => {
+        clearTimeout(initialFetch);
+        clearInterval(dataInterval);
+      };
     }
   }, [fetchData, isAuthenticated]);
 
@@ -154,10 +160,10 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (activeTab === 'dashboard') {
-      return <LiveReport onBack={() => setActiveTab('home')} initialTab="dashboard" initialData={unitsData as any} />;
+      return <LiveReport onBack={() => setActiveTab('home')} initialTab="dashboard" initialData={unitsData} />;
     }
     if (activeTab === 'online') {
-      return <LiveReport onBack={() => setActiveTab('home')} initialTab="online" initialData={unitsData as any} />;
+      return <LiveReport onBack={() => setActiveTab('home')} initialTab="online" initialData={unitsData} />;
     }
     if (activeTab === 'longterm') {
       return <LongTermReport onBack={() => setActiveTab('home')} />;

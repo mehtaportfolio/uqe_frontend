@@ -89,33 +89,33 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
 
                     return (
                       <>
-                        {rows.map((row: any, artIdx: number) => (
+                        {rows.map((row: unknown, artIdx: number) => (
                           <React.Fragment key={artIdx}>
                             <tr 
-                              onClick={() => toggleArticleExpansion(unitData.unit, viewMode === 'article' ? row.articleNumber : row.machineName)}
+                              onClick={() => toggleArticleExpansion(unitData.unit, viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName)}
                               className="hover:bg-gray-50/50 transition-colors cursor-pointer"
                             >
                               <td className="px-4 py-4 text-xs font-bold text-gray-800 flex items-center space-x-2">
-                                <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] ? 'rotate-90' : ''}`}>
+                                <div className={`transition-transform duration-200 ${expandedArticles[`${unitData.unit}-${viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName}`] ? 'rotate-90' : ''}`}>
                                   <ChevronRight size={14} className="text-uster-red" />
                                 </div>
-                                <span>{viewMode === 'article' ? row.articleNumber : row.displayMachineName}</span>
+                                <span>{viewMode === 'article' ? (row as any).articleNumber : (row as any).displayMachineName}</span>
                               </td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.NSABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.LABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.TABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CCABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.FABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.PPABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.PFABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CVpABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.HpABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{row.alarmBreakdown?.CMTABlks || 0}</td>
-                              <td className="px-2 py-4 text-xs font-black text-uster-red text-center bg-red-50/30">{row.totalAlarms || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.NSABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.LABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.TABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.CABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.CCABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.FABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.PPABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.PFABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.CVpABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.HpABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-gray-900 text-center">{(row as any).alarmBreakdown?.CMTABlks || 0}</td>
+                              <td className="px-2 py-4 text-xs font-black text-uster-red text-center bg-red-50/30">{(row as any).totalAlarms || 0}</td>
                             </tr>
                             <AnimatePresence>
-                              {expandedArticles[`${unitData.unit}-${viewMode === 'article' ? row.articleNumber : row.machineName}`] && (viewMode === 'article' ? row.machines : row.articles) && (
+                              {expandedArticles[`${unitData.unit}-${viewMode === 'article' ? (row as any).articleNumber : (row as any).machineName}`] && (viewMode === 'article' ? (row as any).machines : (row as any).articles) && (
                                 <motion.tr
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: 'auto' }}
@@ -125,25 +125,25 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
                                     <div className="overflow-hidden border-l-4 border-uster-red/20">
                                       <table className="w-full">
                                         <tbody className="divide-y divide-gray-100">
-                                          {[...(viewMode === 'article' ? row.machines : row.articles)].sort((a, b) => {
+                                          {[...(viewMode === 'article' ? (row as any).machines : (row as any).articles)].sort((a, b) => {
                                             const valA = viewMode === 'article' ? a.machineName : a.articleNumber;
                                             const valB = viewMode === 'article' ? b.machineName : b.articleNumber;
                                             return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
-                                          }).map((sub: any, subIdx: number) => (
+                                          }).map((sub: unknown, subIdx: number) => (
                                             <tr key={subIdx} className="bg-white/50">
-                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-500 pl-10 italic">{viewMode === 'article' ? sub.machineName.slice(-2) : sub.articleNumber}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.NSABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.LABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.TABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CCABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.FABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.PPABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.PFABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CVpABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.HpABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{sub.alarmBreakdown?.CMTABlks || 0}</td>
-                                              <td className="px-2 py-3 text-[10px] font-black text-uster-red/60 text-center bg-red-50/10">{sub.totalAlarms || 0}</td>
+                                              <td className="px-4 py-3 text-[10px] font-bold text-gray-500 pl-10 italic">{viewMode === 'article' ? (sub as any).machineName.slice(-2) : (sub as any).articleNumber}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.NSABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.LABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.TABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.CABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.CCABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.FABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.PPABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.PFABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.CVpABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.HpABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-bold text-gray-600 text-center">{(sub as any).alarmBreakdown?.CMTABlks || 0}</td>
+                                              <td className="px-2 py-3 text-[10px] font-black text-uster-red/60 text-center bg-red-50/10">{(sub as any).totalAlarms || 0}</td>
                                             </tr>
                                           ))}
                                         </tbody>

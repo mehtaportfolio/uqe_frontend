@@ -24,7 +24,7 @@ import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 // Sub-components and types
-import { type LiveReportData, type TrendResponse } from './live-report/types';
+import { type LiveReportData, type TrendResponse, type ArticleCutData, type MachineCutData } from './live-report/types';
 import { getMachineWiseData } from './live-report/utils';
 import DashboardView from './live-report/DashboardView';
 import CutsView from './live-report/CutsView';
@@ -524,9 +524,9 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           return isNaN(num) ? '0.0' : num.toFixed(1);
         };
 
-        const formatRound = (val: any) => {
+        const formatRound = (val: string | number | undefined | null) => {
           if (val === undefined || val === null || val === '') return '0';
-          const num = parseFloat(val);
+          const num = typeof val === 'number' ? val : parseFloat(val);
           return isNaN(num) ? '0' : Math.round(num).toString();
         };
 
@@ -543,14 +543,14 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
-          const tableData: any[] = [];
+          const tableData: any[][] = [];
           const reportRows = viewMode === 'article' 
             ? [...(unitData.articles || [])].sort((a, b) => a.articleNumber.localeCompare(b.articleNumber, undefined, { numeric: true, sensitivity: 'base' }))
             : getMachineWiseData(unitData);
           
-          reportRows?.forEach((row: any) => {
+          reportRows?.forEach((row) => {
             tableData.push([
-              viewMode === 'article' ? row.articleNumber : row.machineName,
+              viewMode === 'article' ? (row as ArticleCutData).articleNumber : ((row as unknown) as MachineCutData).machineName,
               formatRound(row.Thin50),
               formatRound(row.Thick50),
               formatRound(row.Nep200),
@@ -600,23 +600,24 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
-          const tableData: any[] = [];
+          const tableData: any[][] = [];
           const reportRows = viewMode === 'article' 
             ? [...(unitData.articles || [])].sort((a, b) => a.articleNumber.localeCompare(b.articleNumber, undefined, { numeric: true, sensitivity: 'base' }))
             : getMachineWiseData(unitData);
           
-          reportRows?.forEach((row: any) => {
+          reportRows?.forEach((row) => {
+            const r = row as any;
             tableData.push([
-              viewMode === 'article' ? row.articleNumber : row.machineName,
-              Math.round(Number(row.YarnFaults)),
-              Math.round(Number(row.YarnJoints)),
-              Math.round(Number(row.YarnBreaks)),
-              Math.round(Number(row.NCuts)),
-              Math.round(Number(row.SCuts)),
-              Math.round(Number(row.LCuts)),
-              Math.round(Number(row.TCuts)),
-              Math.round(Number(row.FDCuts)),
-              Math.round(Number(row.PPCuts))
+              viewMode === 'article' ? r.articleNumber : r.machineName,
+              Math.round(Number(r.YarnFaults)),
+              Math.round(Number(r.YarnJoints)),
+              Math.round(Number(r.YarnBreaks)),
+              Math.round(Number(r.NCuts)),
+              Math.round(Number(r.SCuts)),
+              Math.round(Number(r.LCuts)),
+              Math.round(Number(r.TCuts)),
+              Math.round(Number(r.FDCuts)),
+              Math.round(Number(r.PPCuts))
             ]);
           });
 
@@ -661,26 +662,27 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
           pdf.text(`${unitData.unit} - ${unitData.shiftStartTime ? formatDate(unitData.shiftStartTime) : 'Current'}${shiftInfo}`, 14, currentY + 5);
           currentY += 10;
 
-          const tableData: any[] = [];
+          const tableData: any[][] = [];
           const reportRows = viewMode === 'article' 
             ? [...(unitData.articles || [])].sort((a, b) => a.articleNumber.localeCompare(b.articleNumber, undefined, { numeric: true, sensitivity: 'base' }))
             : getMachineWiseData(unitData);
 
-          reportRows?.forEach((row: any) => {
+          reportRows?.forEach((row) => {
+            const r = row as any;
             tableData.push([
-              viewMode === 'article' ? row.articleNumber : row.machineName,
-              row.alarmBreakdown?.NSABlks || 0,
-              row.alarmBreakdown?.LABlks || 0,
-              row.alarmBreakdown?.TABlks || 0,
-              row.alarmBreakdown?.CABlks || 0,
-              row.alarmBreakdown?.CCABlks || 0,
-              row.alarmBreakdown?.FABlks || 0,
-              row.alarmBreakdown?.PPABlks || 0,
-              row.alarmBreakdown?.PFABlks || 0,
-              row.alarmBreakdown?.CVpABlks || 0,
-              row.alarmBreakdown?.HpABlks || 0,
-              row.alarmBreakdown?.CMTABlks || 0,
-              row.totalAlarms || 0
+              viewMode === 'article' ? r.articleNumber : r.machineName,
+              r.alarmBreakdown?.NSABlks || 0,
+              r.alarmBreakdown?.LABlks || 0,
+              r.alarmBreakdown?.TABlks || 0,
+              r.alarmBreakdown?.CABlks || 0,
+              r.alarmBreakdown?.CCABlks || 0,
+              r.alarmBreakdown?.FABlks || 0,
+              r.alarmBreakdown?.PPABlks || 0,
+              r.alarmBreakdown?.PFABlks || 0,
+              r.alarmBreakdown?.CVpABlks || 0,
+              r.alarmBreakdown?.HpABlks || 0,
+              r.alarmBreakdown?.CMTABlks || 0,
+              r.totalAlarms || 0
             ]);
           });
 
@@ -724,15 +726,15 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
         if (isShiftReport) {
           // Complex header for shift report
           const firstRow = [{ content: FIRST_COLUMN_OPTIONS.find(o => o.id === selectedFirstColumn)?.label || 'Label', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } }];
-          const secondRow = [];
+          const secondRow: any[] = [];
           
           baseDates.forEach(date => {
             const shiftsForDate = allKeys.filter(k => k.startsWith(date));
-            firstRow.push({ 
+            firstRow.push(({ 
               content: formatDate(date), 
               colSpan: shiftsForDate.length, 
               styles: { halign: 'center' } 
-            } as any);
+            } as unknown) as any);
             
             shiftsForDate.forEach(key => {
               secondRow.push({ 
@@ -742,7 +744,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
             });
           });
           
-          firstRow.push({ content: '% Diff', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } } as any);
+          firstRow.push(({ content: '% Diff', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } } as unknown) as any);
           head = [firstRow, secondRow];
         } else {
           // Simple header for daily report
@@ -751,7 +753,7 @@ const LiveReport: React.FC<LiveReportProps> = ({ onBack, initialTab = 'dashboard
         }
         
         const body = trendResponse.labels.map(label => {
-          const rowData: any[] = [label];
+          const rowData: (string | number)[] = [label];
           allKeys.forEach(key => {
             const dayData = trendResponse.data.find(d => d.date === key);
             rowData.push(dayData ? dayData[label] : '-');

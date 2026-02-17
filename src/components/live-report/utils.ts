@@ -1,4 +1,4 @@
-import { type LiveReportData } from './types';
+import { type LiveReportData, type ArticleCutData } from './types';
 
 export const getMachineWiseData = (unitData: LiveReportData) => {
   const machineMap: Record<string, {
@@ -23,7 +23,7 @@ export const getMachineWiseData = (unitData: LiveReportData) => {
     count: number;
     totalAlarms: number;
     alarmBreakdown: Record<string, number>;
-    articles: any[];
+    articles: ArticleCutData[];
   }> = {};
   
   unitData.articles?.forEach(art => {
@@ -88,7 +88,6 @@ export const getMachineWiseData = (unitData: LiveReportData) => {
         ...art,
         ...mach,
         articleNumber: art.articleNumber,
-        displayMachineName: displayMachineName,
         machines: []
       });
     });
