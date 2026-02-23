@@ -25,14 +25,12 @@ const FIRST_COLUMN_OPTIONS = [
 const TREND_GROUPS = [
   { id: 'quality', label: 'Quality' },
   { id: 'cuts', label: 'Cuts' },
-  { id: 'alarms', label: 'Alarms' },
   { id: 'cmt', label: 'CMT' },
 ];
 
 const GROUP_PARAMETERS: Record<string, string[]> = {
   quality: ['Nep140', 'Nep200', 'Thick35', 'Thick50', 'Thin40', 'Thin50', 'CVAvg', 'HAvg', 'IPI', 'HSIPI'],
   cuts: ['YarnFaults', 'NCuts', 'SCuts', 'LCuts', 'TCuts', 'FDCuts', 'PPCuts', 'CpCuts', 'CmCuts', 'CCpCuts', 'CCmCuts'],
-  alarms: ['totalAlarms', 'NSABlks', 'LABlks', 'TABlks', 'CABlks', 'CCABlks', 'FABlks', 'PPABlks', 'PFABlks', 'CVpABlks', 'HpABlks', 'CMTABlks'],
   cmt: ['B_A1Events', 'B_A2Events', 'B_B1Events', 'B_B2Events'],
 };
 
@@ -41,13 +39,13 @@ const PARAMETER_SHORT_NAMES: Record<string, string> = {
   CpCuts: 'Cp', CmCuts: 'Cm', CCpCuts: 'CCp', CCmCuts: 'CCm',
   CVAvg: 'CV%', HAvg: 'H', NSABlks: 'NS', LABlks: 'LA', TABlks: 'TA', CABlks: 'CA', CCABlks: 'CC',
   FABlks: 'FA', PPABlks: 'PP', PFABlks: 'PF', CVpABlks: 'CV', HpABlks: 'HA', CMTABlks: 'CMT',
-  IPI: 'IPI', HSIPI: 'HS IPI', totalAlarms: 'Total Alarms'
+  IPI: 'IPI', HSIPI: 'HS IPI', totalAlarms: 'Total Alarms',
+  B_A1Events: 'A1', B_A2Events: 'A2', B_B1Events: 'B1', B_B2Events: 'B2'
 };
 
 const DEFAULT_GROUP_PARAMETERS: Record<string, string> = {
   quality: 'IPI',
   cuts: 'YarnFaults',
-  alarms: 'totalAlarms',
   cmt: 'B_A1Events'
 };
 
@@ -214,7 +212,7 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
       const labelMachineMap: Record<string, Set<string>> = {};
 
       data.forEach(item => {
-        if (selectedUnit && item.MillUnit !== selectedUnit) return;
+        if (selectedUnit && String(item.MillUnit) !== selectedUnit) return;
 
         const d = new Date(item.ShiftStartTime);
         if (isNaN(d.getTime())) return;
@@ -238,12 +236,6 @@ const TrendTab: React.FC<TrendTabProps> = ({ data, onLoadData, loading, onTrendR
           val = (Number(item.Thin50 || 0)) + (Number(item.Thick50 || 0)) + (Number(item.Nep200 || 0));
         } else if (selectedParameter === 'HSIPI') {
           val = (Number(item.Thin40 || 0)) + (Number(item.Thick35 || 0)) + (Number(item.Nep140 || 0));
-        } else if (selectedParameter === 'totalAlarms') {
-          const alarmColumns = [
-            'NSABlks', 'LABlks', 'TABlks', 'CABlks', 'CCABlks', 
-            'FABlks', 'PPABlks', 'PFABlks', 'CVpABlks', 'HpABlks', 'CMTABlks'
-          ];
-          val = alarmColumns.reduce((acc, col) => acc + (Number(item[col]) || 0), 0);
         } else {
           val = Number(item[selectedParameter]) || 0;
         }

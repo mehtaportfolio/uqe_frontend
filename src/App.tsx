@@ -71,7 +71,7 @@ const App: React.FC = () => {
     },
   });
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (showNotification = false) => {
     if (!isAuthenticated) return;
     
     const units = ['U-1', 'U-2', 'U-3', 'U-4', 'U-5', 'U-6'];
@@ -95,26 +95,28 @@ const App: React.FC = () => {
             return [...prev, unitData];
           });
           setLoading(false);
-          showToast(`${unit} Data loaded`);
+          if (showNotification) {
+            showToast(`${unit} Data loaded`);
+          }
         }
       } catch (error) {
         console.error(`Error fetching live data for ${unit}:`, error);
       }
     }
-  }, [isAuthenticated]);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       const initialFetch = setTimeout(() => {
-        void fetchData();
+        void fetchData(true);
       }, 0);
-      const dataInterval = setInterval(fetchData, 30000);
+      const dataInterval = setInterval(() => void fetchData(false), 30000);
       return () => {
         clearTimeout(initialFetch);
         clearInterval(dataInterval);
       };
     }
-  }, [fetchData, isAuthenticated]);
+  }, [isAuthenticated, fetchData]);
 
   useEffect(() => {
     if (isAuthenticated && unitsData.length > 0) {
