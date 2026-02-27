@@ -14,15 +14,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isBioEnabled, setIsBioEnabled] = useState(false);
+  const [isMobile] = useState(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
-  const handleBioAuth = useCallback(async () => {
+  const handleBioAuth = useCallback(async (isAuto = false) => {
     const success = await authenticateWithBiometrics();
     if (success) {
       const storedPassword = getStoredPassword();
       if (storedPassword) {
         // Automatically login with stored password
         onLogin(storedPassword);
-      } else {
+      } else if (!isAuto) {
         setError('Biometric data found but password missing. Please enter password.');
       }
     }
@@ -32,14 +33,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const enabled = getBiometricEnabled();
     setIsBioEnabled(enabled);
     
-    if (enabled) {
+    if (enabled || isMobile) {
       // Auto-trigger bio auth after a short delay to allow UI to render
       const timer = setTimeout(() => {
-        handleBioAuth();
+        handleBioAuth(true);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [handleBioAuth]);
+  }, [handleBioAuth, isMobile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +135,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {isBioEnabled && (
             <button
               type="button"
-              onClick={handleBioAuth}
+              onClick={() => handleBioAuth(false)}
               className="w-full bg-blue-50 text-blue-600 py-3 sm:py-4 rounded-2xl font-black uppercase tracking-widest border-2 border-blue-100 active:scale-95 transition-all flex items-center justify-center space-x-2 text-sm sm:text-base"
             >
               <Fingerprint size={18} className="sm:w-5 sm:h-5" />
