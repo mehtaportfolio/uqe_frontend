@@ -103,7 +103,7 @@ const App: React.FC = () => {
         console.error(`Error fetching live data for ${unit}:`, error);
       }
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
